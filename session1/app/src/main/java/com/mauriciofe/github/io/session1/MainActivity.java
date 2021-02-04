@@ -12,11 +12,27 @@ import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Spinner;
 
 public class MainActivity extends AppCompatActivity {
 
+    Spinner spnDepartment;
+    Spinner spnAssetGroup;
+    EditText edtStartDate;
+    EditText edtEndDate;
+    EditText edtSearch;
+    ListView listViewAssets;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        spnDepartment = findViewById(R.id.main_spn_department);
+        spnAssetGroup = findViewById(R.id.main_spn_asset_group);
+        edtStartDate = findViewById(R.id.editEndDate);
+        edtEndDate = findViewById(R.id.editStartDate);
+        edtSearch = findViewById(R.id.editTextSearch);
+        listViewAssets = findViewById(R.id.listViewAssets);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
