@@ -7,7 +7,7 @@
     android:orientation="horizontal">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/imgAssetImage"
         android:layout_width="71dp"
         android:layout_height="68dp"
         android:src="@android:mipmap/sym_def_app_icon" />
@@ -45,19 +45,19 @@
         android:layout_gravity="center_vertical|end"
         >
         <ImageView
-            android:id="@+id/imageView1"
+            android:id="@+id/imgEdit"
             android:layout_width="48dp"
             android:layout_marginEnd="8dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_baseline_edit" />
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/imgTransfer"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_baseline_exit_to_app_24" />
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/imgHistory"
             android:layout_width="48dp"
             android:layout_height="48dp"
 
