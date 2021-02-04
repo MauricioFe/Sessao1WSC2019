@@ -37,22 +37,18 @@ public class MainActivity extends AppCompatActivity {
     EditText edtEndDate;
     EditText edtSearch;
     ListView listViewAssets;
-    List<AssetGroup> assetGroupList;
-    List<Department> departmentsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         inicializandoViews();
-        assetGroupList = new ArrayList<>();
-        departmentsList = new ArrayList<>();
         AssetsTask task = new AssetsTask();
         AssetGroupTask taskGroup = new AssetGroupTask();
         DepartmentTask taskDepartment = new DepartmentTask();
 
         taskGroup.execute("http://192.168.0.101:5000/api/AssetGroups");
-        taskDepartment.execute("http://192.168.0.101:5000/api/AssetGroups");
+        taskDepartment.execute("http://192.168.0.101:5000/api/Departments");
         task.execute("http://192.168.0.101:5000/api/assets");
 
 
@@ -173,7 +169,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            assetGroupList = assetGroupsList;
+            AssetGroupSpinnerAdapter adapter = new AssetGroupSpinnerAdapter(MainActivity.this, assetGroupsList, 0);
+            spnAssetGroup.setAdapter(adapter);
         }
     }
     public class DepartmentTask extends AsyncTask<String, String, String> {
