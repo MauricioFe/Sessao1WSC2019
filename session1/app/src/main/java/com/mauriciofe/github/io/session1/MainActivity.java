@@ -2,6 +2,8 @@ package com.mauriciofe.github.io.session1;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -27,6 +29,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     EditText edtEndDate;
     EditText edtSearch;
     ListView listViewAssets;
+    public long assetGroupId;
+    public long departmentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +51,31 @@ public class MainActivity extends AppCompatActivity {
         AssetsTask task = new AssetsTask();
         AssetGroupTask taskGroup = new AssetGroupTask();
         DepartmentTask taskDepartment = new DepartmentTask();
-
         taskGroup.execute("http://192.168.0.101:5000/api/AssetGroups");
         taskDepartment.execute("http://192.168.0.101:5000/api/Departments");
         task.execute("http://192.168.0.101:5000/api/assets");
+        edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (count > 2) {
+                    task.cancel(true);
+                    String teste = "http://192.168.0.101:5000/api/assets/filter?search=" + edtSearch.getText().toString() +
+                            "&assetGroupId=" + assetGroupId + "&departmentId=" + departmentId +
+                            "&startDate=" + edtStartDate.getText().toString() + "&endDate=" + edtEndDate.getText().toString();
+                    task.execute(teste);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,15 +83,42 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        recebendoIdSpinner();
+    }
+
+    private void recebendoIdSpinner() {
+        final int[] i = {0};
         spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, id + "", Toast.LENGTH_LONG).show();
+                i[0]++;
+                if (i[0] == 1) {
+                    departmentId = 0;
+                    i[0] = 0;
+                } else
+                    departmentId = id;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+                departmentId = 0;
+            }
+        });
+        spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                i[0]++;
+                if (i[0] == 1) {
+                    assetGroupId = 0;
+                    i[0] = 0;
+                } else
+                    assetGroupId = id;
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                assetGroupId = 0;
             }
         });
     }
@@ -173,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
             spnAssetGroup.setAdapter(adapter);
         }
     }
+
     public class DepartmentTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -213,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            DepartmentSpinnerAdapter adapter = new DepartmentSpinnerAdapter(MainActivity.this,departmentList, 0);
+            DepartmentSpinnerAdapter adapter = new DepartmentSpinnerAdapter(MainActivity.this, departmentList, 0);
             spnDepartment.setAdapter(adapter);
         }
     }
