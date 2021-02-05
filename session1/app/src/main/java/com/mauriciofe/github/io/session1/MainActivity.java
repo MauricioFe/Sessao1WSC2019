@@ -1,13 +1,17 @@
 package com.mauriciofe.github.io.session1;
 
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -32,6 +36,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -76,21 +81,37 @@ public class MainActivity extends AppCompatActivity {
         edtEndDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+
                 if (!hasFocus && edtStartDate.getText().length() > 0) {
                     buscaPorFiltros();
                 }
+                if (hasFocus){
+                    openDatePickerDialog(edtEndDate);
+                }
             }
         });
-
+        edtEndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDatePickerDialog(edtEndDate);
+            }
+        });
         edtStartDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && edtEndDate.getText().length() > 0) {
                     buscaPorFiltros();
                 }
+                if (hasFocus)
+                    openDatePickerDialog(edtStartDate);
             }
         });
-
+        edtStartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDatePickerDialog(edtStartDate);
+            }
+        });
         edtSearch.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -111,6 +132,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void openDatePickerDialog(EditText editText) {
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        final Calendar c = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                editText.setText(dayOfMonth + "-" + (month + 1) + "-" + year);
+            }
+        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.show();
     }
 
     private void buscaPorFiltros() {
