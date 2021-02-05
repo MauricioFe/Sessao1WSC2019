@@ -51,7 +51,8 @@
         app:layout_constraintEnd_toStartOf="@id/editEndDate"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:text="01-01-2018" />
 
     <EditText
         android:id="@+id/editEndDate"
@@ -61,7 +62,9 @@
         android:inputType="date"
         app:layout_constraintBottom_toBottomOf="@+id/editStartDate"
         app:layout_constraintEnd_toEndOf="@+id/main_spn_asset_group"
-        app:layout_constraintTop_toTopOf="@+id/editStartDate" />
+        app:layout_constraintTop_toTopOf="@+id/editStartDate"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="06-07-2020" />
 
     <EditText
         android:id="@+id/editTextSearch"

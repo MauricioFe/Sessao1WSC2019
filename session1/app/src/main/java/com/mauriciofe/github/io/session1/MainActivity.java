@@ -4,11 +4,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,15 +36,19 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String BASE_URL = "http://192.168.0.104:5000";
     Spinner spnDepartment;
     Spinner spnAssetGroup;
     EditText edtStartDate;
     EditText edtEndDate;
     EditText edtSearch;
+    TextView txtCountAssets;
     ListView listViewAssets;
     public long assetGroupId;
     public long departmentId;
-
+    public int numTotalAssets;
+    public int numFilteredAssets;
+    List<Assets> assetsListTotal = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,29 +57,24 @@ public class MainActivity extends AppCompatActivity {
         AssetsTask task = new AssetsTask();
         AssetGroupTask taskGroup = new AssetGroupTask();
         DepartmentTask taskDepartment = new DepartmentTask();
-        taskGroup.execute("http://192.168.0.101:5000/api/AssetGroups");
-        taskDepartment.execute("http://192.168.0.101:5000/api/Departments");
-        task.execute("http://192.168.0.101:5000/api/assets");
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        taskGroup.execute(BASE_URL + "/api/AssetGroups");
+        taskDepartment.execute(BASE_URL + "/api/Departments");
+        task.execute(BASE_URL + "/api/assets");
 
-            }
-
+        edtSearch.setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (count > 2) {
-                    task.cancel(true);
-                    String teste = "http://192.168.0.101:5000/api/assets/filter?search=" + edtSearch.getText().toString() +
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (edtSearch.getText().length() > 2) {
+                    String urlFilter = BASE_URL + "/api/assets/filter?search=" + edtSearch.getText().toString() +
                             "&assetGroupId=" + assetGroupId + "&departmentId=" + departmentId +
                             "&startDate=" + edtStartDate.getText().toString() + "&endDate=" + edtEndDate.getText().toString();
-                    task.execute(teste);
+                    AssetsTask taskFilter = new AssetsTask();
+                    taskFilter.execute(urlFilter);
+                } else {
+                    AssetsTask taskFilter = new AssetsTask();
+                    taskFilter.execute(BASE_URL + "/api/assets");
                 }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
+                return true;
             }
         });
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -85,17 +86,16 @@ public class MainActivity extends AppCompatActivity {
         });
         recebendoIdSpinner();
     }
+    int i = 0;
 
     private void recebendoIdSpinner() {
-        final int[] i = {0};
         spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                i[0]++;
-                if (i[0] == 1) {
+                i++;
+                if (i == 1) {
                     departmentId = 0;
-                    i[0] = 0;
                 } else
                     departmentId = id;
             }
@@ -108,10 +108,9 @@ public class MainActivity extends AppCompatActivity {
         spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                i[0]++;
-                if (i[0] == 1) {
+                i++;
+                if (i == 1) {
                     assetGroupId = 0;
-                    i[0] = 0;
                 } else
                     assetGroupId = id;
             }
@@ -126,10 +125,11 @@ public class MainActivity extends AppCompatActivity {
     private void inicializandoViews() {
         spnDepartment = findViewById(R.id.main_spn_department);
         spnAssetGroup = findViewById(R.id.main_spn_asset_group);
-        edtStartDate = findViewById(R.id.editEndDate);
-        edtEndDate = findViewById(R.id.editStartDate);
+        edtStartDate = findViewById(R.id.editStartDate);
+        edtEndDate = findViewById(R.id.editEndDate);
         edtSearch = findViewById(R.id.editTextSearch);
         listViewAssets = findViewById(R.id.listViewAssets);
+        txtCountAssets = findViewById(R.id.txtCountAssets);
     }
 
     public class AssetsTask extends AsyncTask<String, String, String> {
@@ -174,9 +174,14 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
+            if (i==0){
+                numTotalAssets = assetsList.size();
+            }
             AssetsAdapter adapter = new AssetsAdapter(assetsList, MainActivity.this);
+            numFilteredAssets = adapter.getCount();
             listViewAssets.setAdapter(adapter);
+
+            txtCountAssets.setText(numFilteredAssets+" assets from "+ numTotalAssets);
         }
     }
 
