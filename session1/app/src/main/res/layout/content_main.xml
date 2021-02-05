@@ -78,16 +78,13 @@
         app:layout_constraintStart_toStartOf="@+id/editStartDate"
         app:layout_constraintTop_toBottomOf="@+id/editEndDate" />
 
-    <ListView
-        android:id="@+id/listViewAssets"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycleViewAssets"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextSearch"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextSearch" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,12 +8,15 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.mauriciofe.github.io.session1.models.Assets;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AssetsAdapter extends BaseAdapter {
+public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsViewHolder> {
     private List<Assets> assetsList = new ArrayList<>();
     private Context context;
 
@@ -22,14 +25,17 @@ public class AssetsAdapter extends BaseAdapter {
         this.context = context;
     }
 
+    @NonNull
     @Override
-    public int getCount() {
-        return assetsList.size();
+    public AssetsAdapter.AssetsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View convertView = LayoutInflater.from(context).inflate(R.layout.assets_list_item, parent, false);
+        return new AssetsViewHolder(convertView);
     }
 
     @Override
-    public Object getItem(int position) {
-        return assetsList.get(position);
+    public void onBindViewHolder(@NonNull AssetsAdapter.AssetsViewHolder holder, int position) {
+        Assets assets = assetsList.get(position);
+        holder.vincula(assets);
     }
 
     @Override
@@ -38,21 +44,36 @@ public class AssetsAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.assets_list_item, parent, false);
-        }
-        TextView txtAssetName = convertView.findViewById(R.id.txtAssetName);
-        TextView txtAssetSN = convertView.findViewById(R.id.txtAssetSN);
-        TextView txtDepartment = convertView.findViewById(R.id.txtDepartment);
-        ImageView imgAssetImage = convertView.findViewById(R.id.imgAssetImage);
-        ImageView imgEdit = convertView.findViewById(R.id.imgEdit);
-        ImageView imgTransfer = convertView.findViewById(R.id.imgTransfer);
-        ImageView imgHistory = convertView.findViewById(R.id.imgHistory);
-        Assets assets = (Assets) getItem(position);
-        txtAssetName.setText(assets.getAssetName());
-        txtAssetSN.setText(assets.getAssetSn());
-        txtDepartment.setText(assets.getNameDescription());
-        return convertView;
+    public int getItemCount() {
+        return assetsList.size();
     }
+
+    public class AssetsViewHolder extends RecyclerView.ViewHolder {
+        private final TextView txtAssetName;
+        private final TextView txtAssetSN;
+        private final TextView txtDepartment;
+        private final ImageView imgAssetImage;
+        private final ImageView imgEdit;
+        private final ImageView imgTransfer;
+        private final ImageView imgHistory;
+        //private Assets assets;
+
+        public AssetsViewHolder(@NonNull View itemView) {
+            super(itemView);
+            txtAssetName = itemView.findViewById(R.id.txtAssetName);
+            txtAssetSN = itemView.findViewById(R.id.txtAssetSN);
+            txtDepartment = itemView.findViewById(R.id.txtDepartment);
+            imgAssetImage = itemView.findViewById(R.id.imgAssetImage);
+            imgEdit = itemView.findViewById(R.id.imgEdit);
+            imgTransfer = itemView.findViewById(R.id.imgTransfer);
+            imgHistory = itemView.findViewById(R.id.imgHistory);
+        }
+
+        private void vincula(Assets assets) {
+            txtAssetName.setText(assets.getAssetName());
+            txtAssetSN.setText(assets.getAssetSn());
+            txtDepartment.setText(assets.getNameDescription());
+        }
+    }
+
 }

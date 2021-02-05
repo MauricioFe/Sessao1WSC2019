@@ -13,13 +13,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mauriciofe.github.io.session1.models.AssetGroup;
@@ -37,7 +37,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     EditText edtEndDate;
     EditText edtSearch;
     TextView txtCountAssets;
-    ListView listViewAssets;
+    RecyclerView recyclerViewAssets;
     public long assetGroupId;
     public long departmentId;
     public int numTotalAssets;
@@ -85,7 +84,9 @@ public class MainActivity extends AppCompatActivity {
                 if (!hasFocus && edtStartDate.getText().length() > 0) {
                     buscaPorFiltros();
                 }
-                if (hasFocus){
+                if (hasFocus) {
+                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(edtEndDate.getWindowToken(), 0);
                     openDatePickerDialog(edtEndDate);
                 }
             }
@@ -103,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
                     buscaPorFiltros();
                 }
                 if (hasFocus)
-                    openDatePickerDialog(edtStartDate);
+                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(edtStartDate.getWindowToken(), 0);
+                openDatePickerDialog(edtStartDate);
             }
         });
         edtStartDate.setOnClickListener(new View.OnClickListener() {
@@ -112,9 +115,30 @@ public class MainActivity extends AppCompatActivity {
                 openDatePickerDialog(edtStartDate);
             }
         });
-        edtSearch.setOnKeyListener(new View.OnKeyListener() {
+        edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (edtSearch.getText().length() > 2) {
+                    buscaPorFiltros();
+                } else {
+                    AssetsTask taskFilter = new AssetsTask();
+                    taskFilter.execute(BASE_URL + "/api/assets");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        edtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (edtSearch.getText().length() > 2) {
                     buscaPorFiltros();
                 } else {
@@ -135,8 +159,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openDatePickerDialog(EditText editText) {
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                .hideSoftInputFromWindow(editText.getWindowToken(), 0);
+
         final Calendar c = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -162,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         edtStartDate = findViewById(R.id.editStartDate);
         edtEndDate = findViewById(R.id.editEndDate);
         edtSearch = findViewById(R.id.editTextSearch);
-        listViewAssets = findViewById(R.id.listViewAssets);
+        recyclerViewAssets = findViewById(R.id.recycleViewAssets);
         txtCountAssets = findViewById(R.id.txtCountAssets);
     }
 
@@ -210,11 +233,12 @@ public class MainActivity extends AppCompatActivity {
             }
             if (i == 0) {
                 numTotalAssets = assetsList.size();
+                i++;
             }
             AssetsAdapter adapter = new AssetsAdapter(assetsList, MainActivity.this);
-            numFilteredAssets = adapter.getCount();
-            listViewAssets.setAdapter(adapter);
-
+            numFilteredAssets = adapter.getItemCount();
+            recyclerViewAssets.setAdapter(adapter);
+            recyclerViewAssets.setLayoutManager(new LinearLayoutManager(MainActivity.this));
             txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
         }
     }
