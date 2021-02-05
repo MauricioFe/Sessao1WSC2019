@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -48,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
     public long departmentId;
     public int numTotalAssets;
     public int numFilteredAssets;
+    int i = 0;
     List<Assets> assetsListTotal = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,15 +64,38 @@ public class MainActivity extends AppCompatActivity {
         taskDepartment.execute(BASE_URL + "/api/Departments");
         task.execute(BASE_URL + "/api/assets");
 
+        edtSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    buscaPorFiltros();
+                }
+            }
+        });
+
+        edtEndDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus && edtStartDate.getText().length() > 0) {
+                    buscaPorFiltros();
+                }
+            }
+        });
+
+        edtStartDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus && edtEndDate.getText().length() > 0) {
+                    buscaPorFiltros();
+                }
+            }
+        });
+
         edtSearch.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (edtSearch.getText().length() > 2) {
-                    String urlFilter = BASE_URL + "/api/assets/filter?search=" + edtSearch.getText().toString() +
-                            "&assetGroupId=" + assetGroupId + "&departmentId=" + departmentId +
-                            "&startDate=" + edtStartDate.getText().toString() + "&endDate=" + edtEndDate.getText().toString();
-                    AssetsTask taskFilter = new AssetsTask();
-                    taskFilter.execute(urlFilter);
+                    buscaPorFiltros();
                 } else {
                     AssetsTask taskFilter = new AssetsTask();
                     taskFilter.execute(BASE_URL + "/api/assets");
@@ -77,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,43 +111,16 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        recebendoIdSpinner();
     }
-    int i = 0;
 
-    private void recebendoIdSpinner() {
-        spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                i++;
-                if (i == 1) {
-                    departmentId = 0;
-                } else
-                    departmentId = id;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                departmentId = 0;
-            }
-        });
-        spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                i++;
-                if (i == 1) {
-                    assetGroupId = 0;
-                } else
-                    assetGroupId = id;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                assetGroupId = 0;
-            }
-        });
+    private void buscaPorFiltros() {
+        String urlFilter = BASE_URL + "/api/assets/filter?search=" + edtSearch.getText().toString() +
+                "&assetGroupId=" + assetGroupId + "&departmentId=" + departmentId +
+                "&startDate=" + edtStartDate.getText().toString() + "&endDate=" + edtEndDate.getText().toString();
+        AssetsTask taskFilter = new AssetsTask();
+        taskFilter.execute(urlFilter);
     }
+
 
     private void inicializandoViews() {
         spnDepartment = findViewById(R.id.main_spn_department);
@@ -174,14 +174,14 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            if (i==0){
+            if (i == 0) {
                 numTotalAssets = assetsList.size();
             }
             AssetsAdapter adapter = new AssetsAdapter(assetsList, MainActivity.this);
             numFilteredAssets = adapter.getCount();
             listViewAssets.setAdapter(adapter);
 
-            txtCountAssets.setText(numFilteredAssets+" assets from "+ numTotalAssets);
+            txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
         }
     }
 
@@ -225,8 +225,35 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            AssetGroupSpinnerAdapter adapter = new AssetGroupSpinnerAdapter(MainActivity.this, assetGroupsList, 0);
+
+            List<String> assetGroupsNameList = new ArrayList<>();
+            List<Integer> assetGroupsIdList = new ArrayList<>();
+            assetGroupsIdList.add(0);
+            assetGroupsNameList.add("Asset Group");
+            for (AssetGroup item : assetGroupsList) {
+                assetGroupsNameList.add(item.getName());
+                assetGroupsIdList.add(item.getId());
+            }
+
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<String>(MainActivity.this,
+                            android.R.layout.simple_spinner_item, assetGroupsNameList);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnAssetGroup.setAdapter(adapter);
+
+            spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    assetGroupId = assetGroupsIdList.get(position);
+                    buscaPorFiltros();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    assetGroupId = 0;
+                }
+            });
+
         }
     }
 
@@ -270,8 +297,33 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            DepartmentSpinnerAdapter adapter = new DepartmentSpinnerAdapter(MainActivity.this, departmentList, 0);
+            List<String> departmentNameList = new ArrayList<>();
+            List<Integer> departmentIdList = new ArrayList<>();
+            departmentIdList.add(0);
+            departmentNameList.add("Department");
+            for (Department item : departmentList) {
+                departmentNameList.add(item.getName());
+                departmentIdList.add(item.getId());
+            }
+
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<String>(MainActivity.this,
+                            android.R.layout.simple_spinner_item, departmentNameList);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spnDepartment.setAdapter(adapter);
+
+            spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    departmentId = departmentIdList.get(position);
+                    buscaPorFiltros();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    departmentId = 0;
+                }
+            });
         }
     }
 }
