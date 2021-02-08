@@ -1,8 +1,9 @@
 package com.mauriciofe.github.io.session1.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Assets {
+public class Assets implements Serializable {
     public int Id;
     public String AssetSn;
     public String AssetName;

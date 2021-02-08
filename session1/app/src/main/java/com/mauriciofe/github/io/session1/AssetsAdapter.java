@@ -53,6 +53,11 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
         return assetsList.size();
     }
 
+    public void atualizaList(List<Assets> assetsList) {
+        this.assetsList = assetsList;
+        notifyDataSetChanged();
+    }
+
     public class AssetsViewHolder extends RecyclerView.ViewHolder {
         private final TextView txtAssetName;
         private final TextView txtAssetSN;
@@ -82,27 +87,29 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
             imgEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (v.getId() == imgEdit.getId()){
+                    if (v.getId() == imgEdit.getId()) {
                         Toast.makeText(v.getContext(), "Editar", Toast.LENGTH_LONG).show();
                     }
                 }
             });
-            imgTrasnfer.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (v.getId() == imgTrasnfer.getId()){
-                        Toast.makeText(v.getContext(), "Transferindo ativo", Toast.LENGTH_LONG).show();
+            if (imgTrasnfer != null && imgHistory != null) {
+                imgTrasnfer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (v.getId() == imgTrasnfer.getId()) {
+                            Toast.makeText(v.getContext(), "Transferindo ativo", Toast.LENGTH_LONG).show();
+                        }
                     }
-                }
-            });
-            imgHistory.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (v.getId() == imgHistory.getId()){
-                        Toast.makeText(v.getContext(), "histórico", Toast.LENGTH_LONG).show();
+                });
+                imgHistory.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (v.getId() == imgHistory.getId()) {
+                            Toast.makeText(v.getContext(), "histórico", Toast.LENGTH_LONG).show();
+                        }
                     }
-                }
-            });
+                });
+            }
         }
 
         private void vincula(Assets assets) {

@@ -4,8 +4,10 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.MenuInflater;
@@ -19,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +38,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,100 +61,104 @@ public class MainActivity extends AppCompatActivity {
     public int numFilteredAssets;
     int i = 0;
     List<Assets> assetsListTotal = new ArrayList<>();
+    AssetsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         inicializandoViews();
+        adapter = new AssetsAdapter(assetsListTotal, MainActivity.this);
+        recyclerViewAssets.setAdapter(adapter);
+        recyclerViewAssets.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         AssetsTask task = new AssetsTask();
         AssetGroupTask taskGroup = new AssetGroupTask();
         DepartmentTask taskDepartment = new DepartmentTask();
         taskGroup.execute(BASE_URL + "/api/AssetGroups");
         taskDepartment.execute(BASE_URL + "/api/Departments");
         task.execute(BASE_URL + "/api/assets");
-
-        edtSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    buscaPorFiltros();
+        if (edtSearch != null && edtEndDate != null && spnAssetGroup != null && edtStartDate != null && spnDepartment != null) {
+            edtSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus) {
+                        buscaPorFiltros();
+                    }
                 }
-            }
-        });
+            });
 
-        edtEndDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
+            edtEndDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
 
-                if (!hasFocus && edtStartDate.getText().length() > 0) {
-                    buscaPorFiltros();
+                    if (!hasFocus && edtStartDate.getText().length() > 0) {
+                        buscaPorFiltros();
+                    }
+                    if (hasFocus) {
+                        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(edtEndDate.getWindowToken(), 0);
+                        openDatePickerDialog(edtEndDate);
+                    }
                 }
-                if (hasFocus) {
-                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(edtEndDate.getWindowToken(), 0);
+            });
+            edtEndDate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                     openDatePickerDialog(edtEndDate);
                 }
-            }
-        });
-        edtEndDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openDatePickerDialog(edtEndDate);
-            }
-        });
-        edtStartDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus && edtEndDate.getText().length() > 0) {
-                    buscaPorFiltros();
+            });
+            edtStartDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (!hasFocus && edtEndDate.getText().length() > 0) {
+                        buscaPorFiltros();
+                    }
+                    if (hasFocus)
+                        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(edtStartDate.getWindowToken(), 0);
+                    openDatePickerDialog(edtStartDate);
                 }
-                if (hasFocus)
-                    ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(edtStartDate.getWindowToken(), 0);
-                openDatePickerDialog(edtStartDate);
-            }
-        });
-        edtStartDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openDatePickerDialog(edtStartDate);
-            }
-        });
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (edtSearch.getText().length() > 2) {
-                    buscaPorFiltros();
-                } else {
-                    AssetsTask taskFilter = new AssetsTask();
-                    taskFilter.execute(BASE_URL + "/api/assets");
+            });
+            edtStartDate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openDatePickerDialog(edtStartDate);
                 }
-            }
+            });
+            edtSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-        edtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (edtSearch.getText().length() > 2) {
-                    buscaPorFiltros();
-                } else {
-                    AssetsTask taskFilter = new AssetsTask();
-                    taskFilter.execute(BASE_URL + "/api/assets");
                 }
-                return true;
-            }
-        });
 
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (edtSearch.getText().length() > 2) {
+                        buscaPorFiltros();
+                    } else {
+                        AssetsTask taskFilter = new AssetsTask();
+                        taskFilter.execute(BASE_URL + "/api/assets");
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+            edtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (edtSearch.getText().length() > 2) {
+                        buscaPorFiltros();
+                    } else {
+                        AssetsTask taskFilter = new AssetsTask();
+                        taskFilter.execute(BASE_URL + "/api/assets");
+                    }
+                    return true;
+                }
+            });
+        }
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,10 +245,8 @@ public class MainActivity extends AppCompatActivity {
                 numTotalAssets = assetsList.size();
                 i++;
             }
-            AssetsAdapter adapter = new AssetsAdapter(assetsList, MainActivity.this);
+            adapter.atualizaList(assetsList);
             numFilteredAssets = adapter.getItemCount();
-            recyclerViewAssets.setAdapter(adapter);
-            recyclerViewAssets.setLayoutManager(new LinearLayoutManager(MainActivity.this));
             txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
         }
     }
@@ -299,22 +305,23 @@ public class MainActivity extends AppCompatActivity {
                     new ArrayAdapter<String>(MainActivity.this,
                             android.R.layout.simple_spinner_item, assetGroupsNameList);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spnAssetGroup.setAdapter(adapter);
+            if (spnAssetGroup != null) {
+                spnAssetGroup.setAdapter(adapter);
+                spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        assetGroupId = assetGroupsIdList.get(position);
+                        buscaPorFiltros();
+                    }
 
-            spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    assetGroupId = assetGroupsIdList.get(position);
-                    buscaPorFiltros();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    assetGroupId = 0;
-                }
-            });
-
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        assetGroupId = 0;
+                    }
+                });
+            }
         }
+
     }
 
     public class DepartmentTask extends AsyncTask<String, String, String> {
@@ -370,25 +377,22 @@ public class MainActivity extends AppCompatActivity {
                     new ArrayAdapter<String>(MainActivity.this,
                             android.R.layout.simple_spinner_item, departmentNameList);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spnDepartment.setAdapter(adapter);
+            if (spnDepartment != null) {
+                spnDepartment.setAdapter(adapter);
 
-            spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    departmentId = departmentIdList.get(position);
-                    buscaPorFiltros();
-                }
+                spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        departmentId = departmentIdList.get(position);
+                        buscaPorFiltros();
+                    }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-                    departmentId = 0;
-                }
-            });
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        departmentId = 0;
+                    }
+                });
+            }
         }
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
     }
 }
