@@ -1,12 +1,16 @@
 package com.mauriciofe.github.io.session1;
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +28,7 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
         this.assetsList = assetsList;
         this.context = context;
     }
+
 
     @NonNull
     @Override
@@ -53,9 +58,9 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
         private final TextView txtAssetSN;
         private final TextView txtDepartment;
         private final ImageView imgAssetImage;
-        private final ImageView imgEdit;
-        private final ImageView imgTransfer;
-        private final ImageView imgHistory;
+        private final ImageButton imgEdit;
+        private final ImageButton imgTrasnfer;
+        private final ImageButton imgHistory;
         //private Assets assets;
 
         public AssetsViewHolder(@NonNull View itemView) {
@@ -65,8 +70,39 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
             txtDepartment = itemView.findViewById(R.id.txtDepartment);
             imgAssetImage = itemView.findViewById(R.id.imgAssetImage);
             imgEdit = itemView.findViewById(R.id.imgEdit);
-            imgTransfer = itemView.findViewById(R.id.imgTransfer);
+            imgTrasnfer = itemView.findViewById(R.id.imgTransfer);
             imgHistory = itemView.findViewById(R.id.imgHistory);
+            itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    MenuItem Edit = menu.add(Menu.NONE, 1, 1, "Edit");
+                    MenuItem Delete = menu.add(Menu.NONE, 2, 2, "Delete");
+                }
+            });
+            imgEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (v.getId() == imgEdit.getId()){
+                        Toast.makeText(v.getContext(), "Editar", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+            imgTrasnfer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (v.getId() == imgTrasnfer.getId()){
+                        Toast.makeText(v.getContext(), "Transferindo ativo", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+            imgHistory.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (v.getId() == imgHistory.getId()){
+                        Toast.makeText(v.getContext(), "histórico", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
 
         private void vincula(Assets assets) {
