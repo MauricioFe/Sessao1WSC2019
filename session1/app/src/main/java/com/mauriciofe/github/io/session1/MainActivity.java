@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -61,7 +62,14 @@ public class MainActivity extends AppCompatActivity {
     public int numFilteredAssets;
     int i = 0;
     List<Assets> assetsListTotal = new ArrayList<>();
+    String assetsListString;
     AssetsAdapter adapter;
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("teste", assetsListString);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,11 +80,26 @@ public class MainActivity extends AppCompatActivity {
         recyclerViewAssets.setAdapter(adapter);
         recyclerViewAssets.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         AssetsTask task = new AssetsTask();
+        task.execute(BASE_URL + "/api/assets");
         AssetGroupTask taskGroup = new AssetGroupTask();
         DepartmentTask taskDepartment = new DepartmentTask();
         taskGroup.execute(BASE_URL + "/api/AssetGroups");
         taskDepartment.execute(BASE_URL + "/api/Departments");
-        task.execute(BASE_URL + "/api/assets");
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (savedInstanceState != null) {
+                    assetsListString = savedInstanceState.getString("teste");
+                    if (assetsListString != null) {
+                        adapter.atualizaList(convertJsonToAssets(assetsListString));
+                        numFilteredAssets = adapter.getItemCount();
+                        txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
+                    }
+                }
+            }
+        }, 1000);
+
         if (edtSearch != null && edtEndDate != null && spnAssetGroup != null && edtStartDate != null && spnDepartment != null) {
             edtSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
@@ -135,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (edtSearch.getText().length() > 2) {
                         buscaPorFiltros();
-                    } else {
+                    } else if (edtSearch.getText().length() == 0) {
                         AssetsTask taskFilter = new AssetsTask();
                         taskFilter.execute(BASE_URL + "/api/assets");
                     }
@@ -226,21 +249,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String content) {
-            List<Assets> assetsList = new ArrayList<>();
-            try {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Assets assets = new Assets();
-                    assets.setId(jsonObject.getInt("id"));
-                    assets.setAssetName(jsonObject.getString("assetName"));
-                    assets.setAssetSn(jsonObject.getString("assetSn"));
-                    assets.setNameDescription(jsonObject.getString("nameDescription"));
-                    assetsList.add(assets);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            List<Assets> assetsList = convertJsonToAssets(content);
+            assetsListString = content;
             if (i == 0) {
                 numTotalAssets = assetsList.size();
                 i++;
@@ -248,6 +258,26 @@ public class MainActivity extends AppCompatActivity {
             adapter.atualizaList(assetsList);
             numFilteredAssets = adapter.getItemCount();
             txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
+        }
+    }
+
+    private List<Assets> convertJsonToAssets(String content) {
+        List<Assets> assetsList = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(content);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                Assets assets = new Assets();
+                assets.setId(jsonObject.getInt("id"));
+                assets.setAssetName(jsonObject.getString("assetName"));
+                assets.setAssetSn(jsonObject.getString("assetSn"));
+                assets.setNameDescription(jsonObject.getString("nameDescription"));
+                assetsList.add(assets);
+            }
+            return assetsList;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -311,7 +341,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         assetGroupId = assetGroupsIdList.get(position);
-                        buscaPorFiltros();
+                        if (assetGroupId > 0)
+                            buscaPorFiltros();
                     }
 
                     @Override
@@ -384,7 +415,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         departmentId = departmentIdList.get(position);
-                        buscaPorFiltros();
+                        if (departmentId > 0)
+                            buscaPorFiltros();
                     }
 
                     @Override

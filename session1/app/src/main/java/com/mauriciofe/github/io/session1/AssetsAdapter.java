@@ -77,13 +77,6 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
             imgEdit = itemView.findViewById(R.id.imgEdit);
             imgTrasnfer = itemView.findViewById(R.id.imgTransfer);
             imgHistory = itemView.findViewById(R.id.imgHistory);
-            itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-                @Override
-                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                    MenuItem Edit = menu.add(Menu.NONE, 1, 1, "Edit");
-                    MenuItem Delete = menu.add(Menu.NONE, 2, 2, "Delete");
-                }
-            });
             imgEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -115,7 +108,8 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
         private void vincula(Assets assets) {
             txtAssetName.setText(assets.getAssetName());
             txtAssetSN.setText(assets.getAssetSn());
-            txtDepartment.setText(assets.getNameDescription());
+            if (txtDepartment != null)
+                txtDepartment.setText(assets.getNameDescription());
         }
     }
 
