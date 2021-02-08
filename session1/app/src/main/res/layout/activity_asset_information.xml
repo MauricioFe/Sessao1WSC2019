@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AssetInformationActivity">
+
+    <Spinner
+        android:id="@+id/spnAccountable"
+        android:layout_width="179dp"
+        android:layout_height="46dp"
+        android:backgroundTintMode="multiply"
+        android:dropDownWidth="match_parent"
+        android:spinnerMode="dialog"
+        app:layout_constraintBottom_toBottomOf="@+id/spnAsset_group"
+        app:layout_constraintEnd_toEndOf="@+id/edtAssetName"
+        app:layout_constraintStart_toEndOf="@+id/main_spn_department"
+        app:layout_constraintTop_toTopOf="@+id/spnAsset_group"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Spinner
+        android:id="@+id/spnAsset_group"
+        android:layout_width="179dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTintMode="multiply"
+        android:dropDownWidth="match_parent"
+        android:spinnerMode="dialog"
+        app:layout_constraintEnd_toStartOf="@+id/spnAccountable"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/edtAssetName"
+        app:layout_constraintTop_toBottomOf="@+id/spn_department"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Spinner
+        android:id="@+id/spn_department"
+        android:layout_width="179dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTintMode="multiply"
+        android:dropDownWidth="match_parent"
+        android:spinnerMode="dialog"
+        app:layout_constraintStart_toStartOf="@+id/edtAssetName"
+        app:layout_constraintTop_toBottomOf="@+id/edtAssetName" />
+
+    <Spinner
+        android:id="@+id/spnLocation"
+        android:layout_width="179dp"
+        android:layout_height="46dp"
+        android:backgroundTintMode="multiply"
+        android:dropDownWidth="match_parent"
+        android:spinnerMode="dialog"
+        app:layout_constraintBottom_toBottomOf="@+id/main_spn_department"
+        app:layout_constraintEnd_toEndOf="@+id/edtAssetName"
+        app:layout_constraintTop_toTopOf="@+id/spn_department"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <EditText
+        android:id="@+id/edtAssetName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:ems="10"
+        android:hint="Asset Name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edtAssetDescriptionMult"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="Asset Description \n Multi Line"
+        android:inputType="textMultiLine"
+        app:layout_constraintEnd_toEndOf="@+id/spnAccountable"
+        app:layout_constraintStart_toStartOf="@+id/spnAsset_group"
+        app:layout_constraintTop_toBottomOf="@+id/spnAsset_group" />
+
+    <EditText
+        android:id="@+id/editTextTextPersonName2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="Expired Warranty"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="@+id/edtAssetDescriptionMult"
+        app:layout_constraintTop_toBottomOf="@+id/edtAssetDescriptionMult" />
+
+    <TextView
+        android:id="@+id/lblAssetName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="AssetSN: "
+        app:layout_constraintBottom_toBottomOf="@+id/editTextTextPersonName2"
+        app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName2"
+        app:layout_constraintTop_toTopOf="@+id/editTextTextPersonName2" />
+
+    <TextView
+        android:id="@+id/txtAssetSn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="dd/gg/nnnn"
+        android:textColor="#222"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/lblAssetName"
+        app:layout_constraintEnd_toEndOf="@+id/edtAssetDescriptionMult"
+        app:layout_constraintHorizontal_bias="0.23"
+        app:layout_constraintStart_toEndOf="@+id/lblAssetName"
+        app:layout_constraintTop_toTopOf="@+id/lblAssetName" />
+
+    <Button
+        android:id="@+id/btnCaptureImage"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/blueVariant"
+        android:text="Capture Image"
+        app:layout_constraintBottom_toBottomOf="@+id/btnBrowse"
+        app:layout_constraintEnd_toStartOf="@+id/btnBrowse"
+        app:layout_constraintTop_toTopOf="@+id/btnBrowse" />
+
+    <Button
+        android:id="@+id/btnBrowse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/blueVariant"
+        android:text="Browse"
+        app:layout_constraintEnd_toEndOf="@+id/txtAssetSn"
+        app:layout_constraintTop_toBottomOf="@+id/txtAssetSn" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPhoto"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnSubmit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCaptureImage" />
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/blue"
+        android:text="Submit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnCancel"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/btnSubmit"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerViewPhoto" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
