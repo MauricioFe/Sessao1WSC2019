@@ -1,15 +1,18 @@
 package com.mauriciofe.github.io.session1;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.mauriciofe.github.io.session1.models.AssetGroup;
+import com.mauriciofe.github.io.session1.models.Assets;
 import com.mauriciofe.github.io.session1.models.Department;
 import com.mauriciofe.github.io.session1.models.Employee;
 import com.mauriciofe.github.io.session1.models.Location;
@@ -22,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,29 +34,44 @@ public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnLocation;
     Spinner spnAssetGroup;
     Spinner spnAccountable;
+    EditText edtAssetName;
+    EditText edtDescription;
+    EditText edtWarrantyDate;
+    TextView txtAssetSN;
     private long departmentId;
     private long locationId;
-    private long AssetGroupId;
+    private long assetGroupId;
     private long accounableId;
+    List<Assets> assetSnList = new ArrayList<>();
     private static final String BASE_URL = "http://192.168.0.104:5000";
+    String departmentIdStr;
+    String assetGroupIdStr;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asset_information);
+        inicializaCampos();
+        DepartmentGetTask departmentGetTask = new DepartmentGetTask();
+        departmentGetTask.execute(BASE_URL + "/api/departments");
+        LocationGetTask locationGetTask = new LocationGetTask();
+        locationGetTask.execute(BASE_URL + "/api/location");
+        AssetGroupTask assetGroupGetTask = new AssetGroupTask();
+        assetGroupGetTask.execute(BASE_URL + "/api/AssetGroups");
+        AccountableTask accountableGetTask = new AccountableTask();
+        accountableGetTask.execute(BASE_URL + "/api/Employees");
+
+    }
+
+    private void inicializaCampos() {
         spnDepartment = findViewById(R.id.spn_department);
         spnLocation = findViewById(R.id.spnLocation);
         spnAssetGroup = findViewById(R.id.spnAsset_group);
         spnAccountable = findViewById(R.id.spnAccountable);
-
-        DepartmentGetTask departmentGetTask = new DepartmentGetTask();
-        departmentGetTask.execute(BASE_URL+"/api/departments");
-        LocationGetTask locationGetTask = new LocationGetTask();
-        locationGetTask.execute(BASE_URL+"/api/location");
-        AssetGroupTask assetGroupGetTask = new AssetGroupTask();
-        assetGroupGetTask.execute(BASE_URL+"/api/AssetGroups");
-        AccountableTask accountableGetTask = new AccountableTask();
-        accountableGetTask.execute(BASE_URL+"/api/Employees");
-
+        edtAssetName = findViewById(R.id.edtAssetName);
+        edtDescription = findViewById(R.id.edtAssetDescriptionMult);
+        edtWarrantyDate = findViewById(R.id.edtWarrantyDate);
+        txtAssetSN = findViewById(R.id.txtAssetSn);
     }
 
     public class DepartmentGetTask extends AsyncTask<String, String, String> {
@@ -117,6 +134,15 @@ public class AssetInformationActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         departmentId = departmentIdList.get(position);
+                        AssetsTask task = new AssetsTask();
+                        if (assetGroupId > 0 && departmentId > 0) {
+                            departmentIdStr = String.valueOf(departmentId);
+                            assetGroupIdStr = String.valueOf(assetGroupId);
+                            departmentIdStr = departmentIdStr.length() < 2 ? "0" + departmentIdStr : departmentIdStr;
+                            assetGroupIdStr = assetGroupIdStr.length() < 2 ? "0" + assetGroupIdStr : assetGroupIdStr;
+                            task.execute(BASE_URL + "/api/assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr);
+                        }
+
                     }
 
                     @Override
@@ -319,17 +345,88 @@ public class AssetInformationActivity extends AppCompatActivity {
                 spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        AssetGroupId = assetGroupsIdList.get(position);
+                        assetGroupId = assetGroupsIdList.get(position);
+                        AssetsTask task = new AssetsTask();
+
+                        if (assetGroupId > 0 && departmentId > 0) {
+                            departmentIdStr = String.valueOf(departmentId);
+                            assetGroupIdStr = String.valueOf(assetGroupId);
+                            departmentIdStr = departmentIdStr.length() < 2 ? "0" + departmentIdStr : departmentIdStr;
+                            assetGroupIdStr = assetGroupIdStr.length() < 2 ? "0" + assetGroupIdStr : assetGroupIdStr;
+                            task.execute(BASE_URL + "/api/assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr);
+                        }
+
                     }
 
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
-                        AssetGroupId = 0;
+                        assetGroupId = 0;
                     }
                 });
             }
         }
 
     }
+
+    public class AssetsTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            BufferedReader reader;
+            try {
+                URL url = new URL(params[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("content-type", "application/json");
+                conn.setDoOutput(false);
+
+                StringBuilder stringBuilder = new StringBuilder();
+                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuilder.append(line);
+                }
+                return stringBuilder.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(String content) {
+            List<Assets> assetsList = new ArrayList<>();
+            try {
+                JSONArray jsonArray = new JSONArray(content);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    Assets assets = new Assets();
+                    assets.setAssetSn(jsonObject.getString("assetSn"));
+                    assetsList.add(assets);
+                }
+                String assetSn = null;
+                String lastAssetSn = null;
+                for (Assets item : assetsList) {
+                    lastAssetSn = item.AssetSn;
+                }
+                StringBuilder bacon = new StringBuilder();
+                if (lastAssetSn != null) {
+                    int n = Integer.parseInt(lastAssetSn.substring(6));
+                    for (int i = 0; i < 4 - String.valueOf(n).length(); i++) {
+                        bacon.append(0);
+                    }
+                    bacon.append(n + 1);
+                    assetSn = departmentIdStr + "/" + assetGroupIdStr + "/" + bacon;
+                } else {
+                    assetSn = departmentIdStr + "/" + assetGroupIdStr + "/0001";
+                }
+                txtAssetSN.setText(assetSn);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
 

@@ -84,7 +84,7 @@
         app:layout_constraintTop_toBottomOf="@+id/spnAsset_group" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName2"
+        android:id="@+id/edtWarrantyDate"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -100,9 +100,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="AssetSN: "
-        app:layout_constraintBottom_toBottomOf="@+id/editTextTextPersonName2"
-        app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName2"
-        app:layout_constraintTop_toTopOf="@+id/editTextTextPersonName2" />
+        app:layout_constraintBottom_toBottomOf="@+id/edtWarrantyDate"
+        app:layout_constraintStart_toEndOf="@+id/edtWarrantyDate"
+        app:layout_constraintTop_toTopOf="@+id/edtWarrantyDate" />
 
     <TextView
         android:id="@+id/txtAssetSn"
