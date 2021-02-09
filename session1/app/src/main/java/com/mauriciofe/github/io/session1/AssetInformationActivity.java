@@ -36,7 +36,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     private long locationId;
     private long AssetGroupId;
     private long accounableId;
-
+    private static final String BASE_URL = "http://192.168.0.104:5000";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +45,16 @@ public class AssetInformationActivity extends AppCompatActivity {
         spnLocation = findViewById(R.id.spnLocation);
         spnAssetGroup = findViewById(R.id.spnAsset_group);
         spnAccountable = findViewById(R.id.spnAccountable);
+
+        DepartmentGetTask departmentGetTask = new DepartmentGetTask();
+        departmentGetTask.execute(BASE_URL+"/api/departments");
+        LocationGetTask locationGetTask = new LocationGetTask();
+        locationGetTask.execute(BASE_URL+"/api/location");
+        AssetGroupTask assetGroupGetTask = new AssetGroupTask();
+        assetGroupGetTask.execute(BASE_URL+"/api/AssetGroups");
+        AccountableTask accountableGetTask = new AccountableTask();
+        accountableGetTask.execute(BASE_URL+"/api/Employees");
+
     }
 
     public class DepartmentGetTask extends AsyncTask<String, String, String> {
@@ -152,7 +162,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     Location location = new Location();
                     location.setId(jsonObject.getInt("id"));
-                    location.setName(jsonObject.getString("Name"));
+                    location.setName(jsonObject.getString("name"));
                     locationList.add(location);
                 }
                 List<Integer> locationListId = new ArrayList<>();
@@ -163,7 +173,8 @@ public class AssetInformationActivity extends AppCompatActivity {
                     locationListId.add(item.getId());
                     locationListName.add(item.getName());
                 }
-                ArrayAdapter adapter = new ArrayAdapter(AssetInformationActivity.this, android.R.layout.simple_spinner_dropdown_item, locationListName);
+                ArrayAdapter adapter = new ArrayAdapter(AssetInformationActivity.this,
+                        android.R.layout.simple_spinner_item, locationListName);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spnLocation.setAdapter(adapter);
                 spnLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -190,11 +201,12 @@ public class AssetInformationActivity extends AppCompatActivity {
             try {
                 URL url = new URL(params[0]);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
                 conn.setRequestProperty("Content-Type", "Application/json");
-                conn.setDoInput(false);
-                StringBuilder stringBuilder = new StringBuilder();
+                conn.setRequestMethod("GET");
+                conn.setDoOutput(false);
+
                 reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder stringBuilder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append(line);
@@ -214,7 +226,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                 JSONArray jsonArray = new JSONArray(content);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Employee employee = new Employee(jsonObject.getInt("id"), jsonObject.getString("firstname"), jsonObject.getString("lastName"), jsonObject.getString("phone"));
+                    Employee employee = new Employee(jsonObject.getInt("id"), jsonObject.getString("firstName"), jsonObject.getString("lastName"), jsonObject.getString("phone"));
                     employeeList.add(employee);
                 }
                 List<Integer> employeeListId = new ArrayList<>();
@@ -226,7 +238,8 @@ public class AssetInformationActivity extends AppCompatActivity {
                     employeeListName.add(item.getFirstName() + " " + item.getLastName());
                 }
 
-                ArrayAdapter adapter = new ArrayAdapter(AssetInformationActivity.this, android.R.layout.simple_spinner_dropdown_item, employeeListName);
+                ArrayAdapter adapter = new ArrayAdapter(AssetInformationActivity.this,
+                        android.R.layout.simple_spinner_item, employeeListName);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spnAccountable.setAdapter(adapter);
                 spnAccountable.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
