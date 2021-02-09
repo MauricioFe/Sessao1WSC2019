@@ -1,10 +1,20 @@
 package com.mauriciofe.github.io.session1.models;
 
 public class Employee {
-    public int Id ;
-    public String FirstName ;
-    public String LastName ;
-    public String  Phone ;
+    private int Id ;
+    private String FirstName ;
+    private String LastName ;
+    private String  Phone ;
+
+    public Employee() {
+    }
+
+    public Employee(int id, String firstName, String lastName, String phone) {
+        Id = id;
+        FirstName = firstName;
+        LastName = lastName;
+        Phone = phone;
+    }
 
     public int getId() {
         return Id;
