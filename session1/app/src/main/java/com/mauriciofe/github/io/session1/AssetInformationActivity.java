@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     EditText edtDescription;
     EditText edtWarrantyDate;
     TextView txtAssetSN;
+    Button btnSubmit;
     private long departmentId;
     private long locationId;
     private long assetGroupId;
@@ -78,25 +80,7 @@ public class AssetInformationActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return getDataGeneric(params[0]);
         }
 
         @Override
@@ -290,25 +274,7 @@ public class AssetInformationActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return getDataGeneric(params[0]);
         }
 
         @Override
@@ -369,30 +335,10 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     public class AssetsTask extends AsyncTask<String, String, String> {
-
         @Override
         protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return getDataGeneric(params[0]);
         }
-
 
         @Override
         protected void onPostExecute(String content) {
@@ -425,6 +371,28 @@ public class AssetInformationActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private String getDataGeneric(String uri) {
+        BufferedReader reader;
+        try {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("content-type", "application/json");
+            conn.setDoOutput(false);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
