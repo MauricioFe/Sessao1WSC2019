@@ -49,7 +49,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String BASE_URL = "http://192.168.0.105:5000";
+    private static final String BASE_URL = "http://192.168.0.105:5000/api/";
     Spinner spnDepartment;
     Spinner spnAssetGroup;
     EditText edtStartDate;
@@ -80,12 +80,9 @@ public class MainActivity extends AppCompatActivity {
         adapter = new AssetsAdapter(assetsListTotal, MainActivity.this);
         recyclerViewAssets.setAdapter(adapter);
         recyclerViewAssets.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        AssetsTask task = new AssetsTask();
-        task.execute(BASE_URL + "/api/assets");
-        AssetGroupTask taskGroup = new AssetGroupTask();
-        DepartmentTask taskDepartment = new DepartmentTask();
-        taskGroup.execute(BASE_URL + "/api/AssetGroups");
-        taskDepartment.execute(BASE_URL + "/api/Departments");
+        preencheRecyclerView(BASE_URL + "assets");
+        preencheSpinnerDepartment();
+        preencheSpinnerAssetGroups();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -160,8 +157,7 @@ public class MainActivity extends AppCompatActivity {
                     if (edtSearch.getText().length() > 2) {
                         buscaPorFiltros();
                     } else if (edtSearch.getText().length() == 0) {
-                        AssetsTask taskFilter = new AssetsTask();
-                        taskFilter.execute(BASE_URL + "/api/assets");
+                        preencheRecyclerView(BASE_URL + "assets");
                     }
                 }
 
@@ -176,8 +172,7 @@ public class MainActivity extends AppCompatActivity {
                     if (edtSearch.getText().length() > 2) {
                         buscaPorFiltros();
                     } else {
-                        AssetsTask taskFilter = new AssetsTask();
-                        taskFilter.execute(BASE_URL + "/api/assets");
+                        preencheRecyclerView(BASE_URL + "assets");
                     }
                     return true;
                 }
@@ -193,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openDatePickerDialog(EditText editText) {
-
         final Calendar c = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -205,13 +199,112 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buscaPorFiltros() {
-        String urlFilter = BASE_URL + "/api/assets/filter?search=" + edtSearch.getText().toString() +
+        String urlFilter = BASE_URL + "assets/filter?search=" + edtSearch.getText().toString() +
                 "&assetGroupId=" + assetGroupId + "&departmentId=" + departmentId +
                 "&startDate=" + edtStartDate.getText().toString() + "&endDate=" + edtEndDate.getText().toString();
-        AssetsTask taskFilter = new AssetsTask();
-        taskFilter.execute(urlFilter);
+        preencheRecyclerView(urlFilter);
     }
 
+    private void preencheSpinnerDepartment() {
+        List<String> departmentNameList = new ArrayList<>();
+        List<Integer> departmentIdList = new ArrayList<>();
+        ConfigConsumeApi.requestApi(BASE_URL + "departments", new Callback<String>() {
+
+            @Override
+            public void onComplete(String result) {
+                try {
+                    JSONArray jsonArray = new JSONArray(result);
+                    departmentIdList.add(0);
+                    departmentNameList.add("Department");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        departmentIdList.add(jsonObject.getInt("id"));
+                        departmentNameList.add(jsonObject.getString("name"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<String>(MainActivity.this,
+                                android.R.layout.simple_spinner_item, departmentNameList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                if (spnDepartment != null) {
+                    spnDepartment.setAdapter(adapter);
+
+                    spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            departmentId = departmentIdList.get(position);
+                            buscaPorFiltros();
+
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            departmentId = 0;
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void preencheSpinnerAssetGroups() {
+        List<String> assetGroupsNameList = new ArrayList<>();
+        List<Integer> assetGroupsIdList = new ArrayList<>();
+        assetGroupsIdList.add(0);
+        assetGroupsNameList.add("Asset Group");
+        ConfigConsumeApi.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                try {
+                    JSONArray jsonArray = new JSONArray(result);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        assetGroupsIdList.add(jsonObject.getInt("id"));
+                        assetGroupsNameList.add(jsonObject.getString("name"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<String>(MainActivity.this,
+                                android.R.layout.simple_spinner_item, assetGroupsNameList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                if (spnAssetGroup != null) {
+                    spnAssetGroup.setAdapter(adapter);
+                    spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            assetGroupId = assetGroupsIdList.get(position);
+                            buscaPorFiltros();
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            assetGroupId = 0;
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void preencheRecyclerView(String uri) {
+        ConfigConsumeApi.requestApi(uri, new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                List<Assets> assetsList = convertJsonToAssets(result);
+                if (i == 0) {
+                    numTotalAssets = assetsList.size();
+                    i++;
+                }
+                adapter.atualizaList(assetsList);
+                numFilteredAssets = adapter.getItemCount();
+                txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
+            }
+        });
+    }
 
     private void inicializandoViews() {
         spnDepartment = findViewById(R.id.main_spn_department);
@@ -221,45 +314,6 @@ public class MainActivity extends AppCompatActivity {
         edtSearch = findViewById(R.id.editTextSearch);
         recyclerViewAssets = findViewById(R.id.recycleViewAssets);
         txtCountAssets = findViewById(R.id.txtCountAssets);
-    }
-
-    public class AssetsTask extends AsyncTask<String, String, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String content) {
-            List<Assets> assetsList = convertJsonToAssets(content);
-            assetsListString = content;
-            if (i == 0) {
-                numTotalAssets = assetsList.size();
-                i++;
-            }
-            adapter.atualizaList(assetsList);
-            numFilteredAssets = adapter.getItemCount();
-            txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
-        }
     }
 
     private List<Assets> convertJsonToAssets(String content) {
@@ -279,153 +333,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
-        }
-    }
-
-    public class AssetGroupTask extends AsyncTask<String, String, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String content) {
-            List<AssetGroup> assetGroupsList = new ArrayList<>();
-            try {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    AssetGroup assetGroup = new AssetGroup();
-                    assetGroup.setId(jsonObject.getInt("id"));
-                    assetGroup.setName(jsonObject.getString("name"));
-                    assetGroupsList.add(assetGroup);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            List<String> assetGroupsNameList = new ArrayList<>();
-            List<Integer> assetGroupsIdList = new ArrayList<>();
-            assetGroupsIdList.add(0);
-            assetGroupsNameList.add("Asset Group");
-            for (AssetGroup item : assetGroupsList) {
-                assetGroupsNameList.add(item.getName());
-                assetGroupsIdList.add(item.getId());
-            }
-
-            ArrayAdapter<String> adapter =
-                    new ArrayAdapter<String>(MainActivity.this,
-                            android.R.layout.simple_spinner_item, assetGroupsNameList);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            if (spnAssetGroup != null) {
-                spnAssetGroup.setAdapter(adapter);
-                spnAssetGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        assetGroupId = assetGroupsIdList.get(position);
-                        if (assetGroupId > 0)
-                            buscaPorFiltros();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        assetGroupId = 0;
-                    }
-                });
-            }
-        }
-
-    }
-
-    public class DepartmentTask extends AsyncTask<String, String, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            BufferedReader reader;
-            try {
-                URL url = new URL(params[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("content-type", "application/json");
-                conn.setDoOutput(false);
-
-                StringBuilder stringBuilder = new StringBuilder();
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                }
-                return stringBuilder.toString();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String content) {
-            List<Department> departmentList = new ArrayList<>();
-            try {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Department department = new Department();
-                    department.setId(jsonObject.getInt("id"));
-                    department.setName(jsonObject.getString("name"));
-                    departmentList.add(department);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            List<String> departmentNameList = new ArrayList<>();
-            List<Integer> departmentIdList = new ArrayList<>();
-            departmentIdList.add(0);
-            departmentNameList.add("Department");
-            for (Department item : departmentList) {
-                departmentNameList.add(item.getName());
-                departmentIdList.add(item.getId());
-            }
-
-            ArrayAdapter<String> adapter =
-                    new ArrayAdapter<String>(MainActivity.this,
-                            android.R.layout.simple_spinner_item, departmentNameList);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            if (spnDepartment != null) {
-                spnDepartment.setAdapter(adapter);
-
-                spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        departmentId = departmentIdList.get(position);
-                        if (departmentId > 0)
-                            buscaPorFiltros();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        departmentId = 0;
-                    }
-                });
-            }
         }
     }
 }
