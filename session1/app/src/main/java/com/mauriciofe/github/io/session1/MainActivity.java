@@ -49,7 +49,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String BASE_URL = "http://192.168.0.104:5000";
+    private static final String BASE_URL = "http://192.168.0.105:5000";
     Spinner spnDepartment;
     Spinner spnAssetGroup;
     EditText edtStartDate;

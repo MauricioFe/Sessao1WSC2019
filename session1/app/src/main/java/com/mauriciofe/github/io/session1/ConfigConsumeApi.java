@@ -31,13 +31,13 @@ public class ConfigConsumeApi {
     }
 
     private static String getRequest(String uri) {
-        BufferedReader reader = null;
+        BufferedReader reader;
         try {
             URL url = new URL(uri);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoInput(false);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            conn.setRequestProperty("Content-Type", "application/json;");
+            conn.setDoInput(true);
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder stringBuilder = new StringBuilder();
             String line;
@@ -48,12 +48,6 @@ public class ConfigConsumeApi {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
