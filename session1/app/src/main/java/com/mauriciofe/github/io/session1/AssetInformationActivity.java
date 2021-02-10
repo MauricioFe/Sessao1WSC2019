@@ -54,15 +54,64 @@ public class AssetInformationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asset_information);
         inicializaCampos();
-        DepartmentGetTask departmentGetTask = new DepartmentGetTask();
-        departmentGetTask.execute(BASE_URL + "/api/departments");
         LocationGetTask locationGetTask = new LocationGetTask();
         locationGetTask.execute(BASE_URL + "/api/location");
         AssetGroupTask assetGroupGetTask = new AssetGroupTask();
         assetGroupGetTask.execute(BASE_URL + "/api/AssetGroups");
         AccountableTask accountableGetTask = new AccountableTask();
         accountableGetTask.execute(BASE_URL + "/api/Employees");
+        preencheSpinnerDepartment();
+    }
 
+    private void preencheSpinnerDepartment() {
+        List<String> departmentNameList = new ArrayList<>();
+        List<Integer> departmentIdList = new ArrayList<>();
+        ConfigConsumeApi.requestApi(BASE_URL + "/api/departments", new Callback<String>() {
+
+            @Override
+            public void onComplete(String result) {
+                try {
+                    JSONArray jsonArray = new JSONArray(result);
+                    departmentIdList.add(0);
+                    departmentNameList.add("Department");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        departmentIdList.add(jsonObject.getInt("id"));
+                        departmentNameList.add(jsonObject.getString("name"));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<String>(AssetInformationActivity.this,
+                                android.R.layout.simple_spinner_item, departmentNameList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                if (spnDepartment != null) {
+                    spnDepartment.setAdapter(adapter);
+
+                    spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            departmentId = departmentIdList.get(position);
+                            AssetsTask task = new AssetsTask();
+                            if (assetGroupId > 0 && departmentId > 0) {
+                                departmentIdStr = String.valueOf(departmentId);
+                                assetGroupIdStr = String.valueOf(assetGroupId);
+                                departmentIdStr = departmentIdStr.length() < 2 ? "0" + departmentIdStr : departmentIdStr;
+                                assetGroupIdStr = assetGroupIdStr.length() < 2 ? "0" + assetGroupIdStr : assetGroupIdStr;
+                                task.execute(BASE_URL + "/api/assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr);
+                            }
+
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            departmentId = 0;
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void inicializaCampos() {
@@ -76,67 +125,6 @@ public class AssetInformationActivity extends AppCompatActivity {
         txtAssetSN = findViewById(R.id.txtAssetSn);
     }
 
-    public class DepartmentGetTask extends AsyncTask<String, String, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            return getDataGeneric(params[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String content) {
-            List<Department> departmentList = new ArrayList<>();
-            try {
-                JSONArray jsonArray = new JSONArray(content);
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    Department department = new Department();
-                    department.setId(jsonObject.getInt("id"));
-                    department.setName(jsonObject.getString("name"));
-                    departmentList.add(department);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            List<String> departmentNameList = new ArrayList<>();
-            List<Integer> departmentIdList = new ArrayList<>();
-            departmentIdList.add(0);
-            departmentNameList.add("Department");
-            for (Department item : departmentList) {
-                departmentNameList.add(item.getName());
-                departmentIdList.add(item.getId());
-            }
-
-            ArrayAdapter<String> adapter =
-                    new ArrayAdapter<String>(AssetInformationActivity.this,
-                            android.R.layout.simple_spinner_item, departmentNameList);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            if (spnDepartment != null) {
-                spnDepartment.setAdapter(adapter);
-
-                spnDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        departmentId = departmentIdList.get(position);
-                        AssetsTask task = new AssetsTask();
-                        if (assetGroupId > 0 && departmentId > 0) {
-                            departmentIdStr = String.valueOf(departmentId);
-                            assetGroupIdStr = String.valueOf(assetGroupId);
-                            departmentIdStr = departmentIdStr.length() < 2 ? "0" + departmentIdStr : departmentIdStr;
-                            assetGroupIdStr = assetGroupIdStr.length() < 2 ? "0" + assetGroupIdStr : assetGroupIdStr;
-                            task.execute(BASE_URL + "/api/assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr);
-                        }
-
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-                        departmentId = 0;
-                    }
-                });
-            }
-        }
-    }
 
     public class LocationGetTask extends AsyncTask<String, String, String> {
 
