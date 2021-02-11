@@ -1,8 +1,9 @@
 package com.mauriciofe.github.io.session1;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -11,23 +12,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.mauriciofe.github.io.session1.models.AssetGroup;
 import com.mauriciofe.github.io.session1.models.Assets;
-import com.mauriciofe.github.io.session1.models.Department;
-import com.mauriciofe.github.io.session1.models.Employee;
-import com.mauriciofe.github.io.session1.models.Location;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +34,8 @@ public class AssetInformationActivity extends AppCompatActivity {
     EditText edtWarrantyDate;
     TextView txtAssetSN;
     Button btnSubmit;
+    Button btnCaptureImage;
+    Button btnBrowse;
     private long departmentId;
     private long locationId;
     private long assetGroupId;
@@ -49,6 +44,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     private static final String BASE_URL = "http://192.168.0.105:5000/api/";
     String departmentIdStr;
     String assetGroupIdStr;
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +55,23 @@ public class AssetInformationActivity extends AppCompatActivity {
         preencheSpinnerDepartment();
         preencheSpinnerLocation();
         preencheSpinnerAccountable();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+        }
+    }
+
+    private void tirarFotoIntent() {
+        Intent tirarFotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (tirarFotoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(tirarFotoIntent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 
     private void preencheSpinnerDepartment() {
@@ -281,6 +294,9 @@ public class AssetInformationActivity extends AppCompatActivity {
         edtDescription = findViewById(R.id.edtAssetDescriptionMult);
         edtWarrantyDate = findViewById(R.id.edtWarrantyDate);
         txtAssetSN = findViewById(R.id.txtAssetSn);
+        btnCaptureImage = findViewById(R.id.btnCaptureImage);
+        btnSubmit = findViewById(R.id.btnSubmit);
+        btnBrowse = findViewById(R.id.btnBrowse);
     }
 
 }
