@@ -7,8 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,8 +31,6 @@ import org.json.JSONObject;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnDepartment;
@@ -46,6 +42,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     EditText edtWarrantyDate;
     TextView txtAssetSN;
     Button btnSubmit;
+    Button btnCancel;
     Button btnCaptureImage;
     Button btnBrowse;
     private long departmentId;
@@ -73,6 +70,27 @@ public class AssetInformationActivity extends AppCompatActivity {
         preencheSpinnerLocation();
         preencheSpinnerAccountable();
         abreCamera();
+        abreGaleria();
+
+    }
+
+    private void inicializaCampos() {
+        spnDepartment = findViewById(R.id.spn_department);
+        spnLocation = findViewById(R.id.spnLocation);
+        spnAssetGroup = findViewById(R.id.spnAsset_group);
+        spnAccountable = findViewById(R.id.spnAccountable);
+        edtAssetName = findViewById(R.id.edtAssetName);
+        edtDescription = findViewById(R.id.edtAssetDescriptionMult);
+        edtWarrantyDate = findViewById(R.id.edtWarrantyDate);
+        txtAssetSN = findViewById(R.id.txtAssetSn);
+        btnCaptureImage = findViewById(R.id.btnCaptureImage);
+        btnSubmit = findViewById(R.id.btnSubmit);
+        btnBrowse = findViewById(R.id.btnBrowse);
+        btnCancel = findViewById(R.id.btnCancel);
+        recyclerListImages = findViewById(R.id.recyclerViewPhoto);
+    }
+
+    private void abreGaleria() {
         btnBrowse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,21 +128,13 @@ public class AssetInformationActivity extends AppCompatActivity {
             preencheListaBitmap(data);
         }
         if (requestCode == REQUEST_BROWSE_IMAGE && resultCode == RESULT_OK) {
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-            executorService.execute(new Runnable() {
+            MyAsyncTask.openNewThreadSync(preencheListaBitmapFromGallery(data.getData()), new Callback<Bitmap>() {
                 @Override
-                public void run() {
-                    Bitmap bitmap = preencheListaBitmapFromGallery(data.getData());
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            bitmapList.add(bitmap);
-                            mAdapter.atualizaLista(bitmapList);
-                        }
-                    });
+                public void onComplete(Bitmap result) {
+                    bitmapList.add(result);
+                    mAdapter.atualizaLista(bitmapList);
                 }
             });
-
         }
     }
 
@@ -375,20 +385,6 @@ public class AssetInformationActivity extends AppCompatActivity {
         });
     }
 
-    private void inicializaCampos() {
-        spnDepartment = findViewById(R.id.spn_department);
-        spnLocation = findViewById(R.id.spnLocation);
-        spnAssetGroup = findViewById(R.id.spnAsset_group);
-        spnAccountable = findViewById(R.id.spnAccountable);
-        edtAssetName = findViewById(R.id.edtAssetName);
-        edtDescription = findViewById(R.id.edtAssetDescriptionMult);
-        edtWarrantyDate = findViewById(R.id.edtWarrantyDate);
-        txtAssetSN = findViewById(R.id.txtAssetSn);
-        btnCaptureImage = findViewById(R.id.btnCaptureImage);
-        btnSubmit = findViewById(R.id.btnSubmit);
-        btnBrowse = findViewById(R.id.btnBrowse);
-        recyclerListImages = findViewById(R.id.recyclerViewPhoto);
-    }
 
 }
 

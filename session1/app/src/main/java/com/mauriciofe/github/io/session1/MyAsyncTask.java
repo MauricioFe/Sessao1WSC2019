@@ -1,5 +1,6 @@
 package com.mauriciofe.github.io.session1;
 
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.BitSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,6 +22,20 @@ public class MyAsyncTask {
             @Override
             public void run() {
                 String result = getRequest(uri);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onComplete(result);
+                    }
+                });
+            }
+        });
+    }
+
+    public static void openNewThreadSync(Bitmap result, Callback<Bitmap> callback) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
