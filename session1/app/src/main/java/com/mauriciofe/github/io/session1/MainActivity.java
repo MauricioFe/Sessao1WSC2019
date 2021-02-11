@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -83,8 +84,7 @@ public class MainActivity extends AppCompatActivity {
         preencheRecyclerView(BASE_URL + "assets");
         preencheSpinnerDepartment();
         preencheSpinnerAssetGroups();
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (savedInstanceState != null) {
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }, 1000);
+
 
         if (edtSearch != null && edtEndDate != null && spnAssetGroup != null && edtStartDate != null && spnDepartment != null) {
             edtSearch.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -235,7 +236,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             departmentId = departmentIdList.get(position);
-                            buscaPorFiltros();
+                            if (departmentId > 0)
+                                buscaPorFiltros();
 
                         }
 
@@ -277,7 +279,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             assetGroupId = assetGroupsIdList.get(position);
-                            buscaPorFiltros();
+                            if (assetGroupId > 0)
+                                buscaPorFiltros();
                         }
 
                         @Override
@@ -301,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 adapter.atualizaList(assetsList);
                 numFilteredAssets = adapter.getItemCount();
+                assetsListString = result;
                 txtCountAssets.setText(numFilteredAssets + " assets from " + numTotalAssets);
             }
         });
