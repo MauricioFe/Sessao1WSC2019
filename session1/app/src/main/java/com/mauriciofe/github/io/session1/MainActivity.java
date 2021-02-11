@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
     private void preencheSpinnerDepartment() {
         List<String> departmentNameList = new ArrayList<>();
         List<Integer> departmentIdList = new ArrayList<>();
-        MyAsyncTask.requestApi(BASE_URL + "departments", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "departments", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
 
             @Override
             public void onComplete(String result) {
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> assetGroupsIdList = new ArrayList<>();
         assetGroupsIdList.add(0);
         assetGroupsNameList.add("Asset Group");
-        MyAsyncTask.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "assetGroups", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 try {
@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preencheRecyclerView(String uri) {
-        MyAsyncTask.requestApi(uri, new Callback<String>() {
+        MyAsyncTask.requestApi(uri, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 List<Assets> assetsList = convertJsonToAssets(result);

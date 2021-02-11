@@ -20,7 +20,7 @@ public class MyAsyncTask {
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";
 
-    public static void requestApi(String uri, Callback<String> callback, String method, String jsonBody) {
+    public static void requestApi(String uri, String method, String jsonBody, Callback<String> callback) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
