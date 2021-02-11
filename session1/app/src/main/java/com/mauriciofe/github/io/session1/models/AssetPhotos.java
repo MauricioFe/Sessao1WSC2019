@@ -3,7 +3,7 @@ package com.mauriciofe.github.io.session1.models;
 public class AssetPhotos {
     private int id;
     private int assetId;
-    private byte assetPhoto;
+    private byte[] assetPhoto;
 
     public int getAssetId() {
         return assetId;
@@ -13,11 +13,11 @@ public class AssetPhotos {
         this.assetId = assetId;
     }
 
-    public byte getAssetPhoto() {
+    public byte[] getAssetPhoto() {
         return assetPhoto;
     }
 
-    public void setAssetPhoto(byte assetPhoto) {
+    public void setAssetPhoto(byte[] assetPhoto) {
         this.assetPhoto = assetPhoto;
     }
 

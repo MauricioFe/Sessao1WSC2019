@@ -1,16 +1,22 @@
 package com.mauriciofe.github.io.session1;
 
 import android.graphics.Bitmap;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +46,58 @@ public class MyAsyncTask {
             }
         });
     }
+
+//    public static void requestApiMultipartForm(String uri, int assetId, Bitmap bitmap, Callback<String> callback) {
+//        executorService.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                String result = postMultipartRequest(uri, assetId, bitmap);
+//                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        callback.onComplete(result);
+//                    }
+//                });
+//            }
+//        });
+//    }
+
+//    private static String postMultipartRequest(String uri, int assetID, Bitmap bitmap) {
+//        BufferedReader reader;
+//        try {
+//            URL url = new URL(uri);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("POST");
+//            String boundary = UUID.randomUUID().toString();
+//            conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+//            conn.setDoOutput(true);
+//            DataOutputStream request = new DataOutputStream(conn.getOutputStream());
+//
+//            request.writeBytes("--" + boundary + "\r\n");
+//            request.writeBytes("Content-Disposition: form-data; name=\"assetId\"\r\n\r\n");
+//            request.writeBytes(assetID + "\r\n");
+//
+//            request.writeBytes("--" + boundary + "\r\n");
+//            request.writeBytes("Content-Disposition: form-data; name=\"photo\"; filename=\\\"\" + file.fileName + \"\\\"\\r\\n\\r\\n");
+//            byte[] bacon = FileUtil.convertBitmapToArrayByte(bitmap);
+//            request.write(FileUtil.convertBitmapToArrayByte(bitmap));
+//            request.writeBytes("\r\n");
+//
+//            request.writeBytes("--" + boundary + "--\r\n");
+//            request.flush();
+//            int respCode = conn.getResponseCode();
+//            StringBuilder stringBuilder = new StringBuilder();
+//            String line;
+//            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+//            while ((line = reader.readLine()) != null) {
+//                stringBuilder.append(line);
+//            }
+//            return stringBuilder.toString();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     public static void openNewThreadSync(Bitmap result, Callback<Bitmap> callback) {
         executorService.execute(new Runnable() {
@@ -82,9 +140,13 @@ public class MyAsyncTask {
             URL url = new URL(uri);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("charset", "utf-8");
+
             conn.setDoOutput(true);
-            conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+            writer.write(jsonBody);
+            writer.flush();
             StringBuilder stringBuilder = new StringBuilder();
             String line;
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
