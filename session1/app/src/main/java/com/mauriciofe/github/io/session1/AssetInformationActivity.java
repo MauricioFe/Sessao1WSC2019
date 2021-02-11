@@ -81,6 +81,16 @@ public class AssetInformationActivity extends AppCompatActivity {
                 startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
             }
         });
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                insereNewAsset(BASE_URL+"assets");
+            }
+        });
+    }
+
+    private void insereNewAsset(String uri) {
+
     }
 
     @Override
@@ -246,7 +256,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                     });
                 }
             }
-        });
+        }, "GET", null);
     }
 
     private void preencheAssetSn() {
@@ -282,7 +292,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
-                });
+                }, "GET", null);
     }
 
     private void preencheSpinnerLocation() {
@@ -320,7 +330,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        }, "GET", null);
     }
 
     private void preencheSpinnerAccountable() {
@@ -358,7 +368,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        }, "GET", null);
     }
 
     private void preencheSpinnerAssetGroups() {
@@ -406,7 +416,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                     });
                 }
             }
-        });
+        }, "GET", null);
     }
 
 
