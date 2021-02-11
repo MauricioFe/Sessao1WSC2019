@@ -3,21 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.mauriciofe.github.io.session1.MainActivity">
     <item
-        android:id="@+id/action_edit"
-        android:icon="@drawable/ic_baseline_edit"
+        android:id="@+id/action_back"
         android:orderInCategory="100"
-        android:title="Editar"
-        app:showAsAction="always" />
-    <item
-        android:id="@+id/action_transfer"
-        android:icon="@drawable/ic_baseline_exit_to_app_24"
-        android:orderInCategory="100"
-        android:title="Transferir"
-        app:showAsAction="always" />
-    <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_baseline_menu_24"
-        android:orderInCategory="100"
-        android:title="Histórico"
+        android:title="Back"
         app:showAsAction="always" />
 </menu>
