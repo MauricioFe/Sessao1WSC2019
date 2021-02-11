@@ -1,6 +1,8 @@
 package com.mauriciofe.github.io.session1;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +16,9 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.mauriciofe.github.io.session1.models.Assets;
 
@@ -41,6 +46,9 @@ public class AssetInformationActivity extends AppCompatActivity {
     private long assetGroupId;
     private long accounableId;
     List<Assets> assetSnList = new ArrayList<>();
+    List<Bitmap> bitmapList = new ArrayList<>();
+    ImagesRecyclerViewAdapter mAdapter;
+    RecyclerView recyclerListImages;
     private static final String BASE_URL = "http://192.168.0.105:5000/api/";
     String departmentIdStr;
     String assetGroupIdStr;
@@ -51,20 +59,37 @@ public class AssetInformationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asset_information);
         inicializaCampos();
+        mAdapter = new ImagesRecyclerViewAdapter(bitmapList, this);
+        recyclerListImages.setLayoutManager(new LinearLayoutManager(AssetInformationActivity.this));
+        recyclerListImages.setAdapter(mAdapter);
         preencheSpinnerAssetGroups();
         preencheSpinnerDepartment();
         preencheSpinnerLocation();
         preencheSpinnerAccountable();
+        btnCaptureImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(AssetInformationActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+                    tirarFotoIntent();
+                else
+                    ActivityCompat.requestPermissions(AssetInformationActivity.this, new String[]{Manifest.permission.CAMERA}, 0);
+            }
+        });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-
+            bitmapList.add(getPictureImage(extras));
+            mAdapter.atualizaLista(bitmapList);
         }
+    }
+
+    private Bitmap getPictureImage(Bundle extras) {
+        Bitmap imageBitmap = (Bitmap) extras.get("data");
+        return imageBitmap;
     }
 
     private void tirarFotoIntent() {
@@ -297,6 +322,7 @@ public class AssetInformationActivity extends AppCompatActivity {
         btnCaptureImage = findViewById(R.id.btnCaptureImage);
         btnSubmit = findViewById(R.id.btnSubmit);
         btnBrowse = findViewById(R.id.btnBrowse);
+        recyclerListImages = findViewById(R.id.recyclerViewPhoto);
     }
 
 }

@@ -13,17 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mauriciofe.github.io.session1.models.AssetPhotos;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class ImagesRecyclerViewAdapter extends RecyclerView.Adapter<ImagesRecyclerViewAdapter.ImagesRecyclerViewHolder> {
-    private List<AssetPhotos> assetPhotosList;
+    private List<Bitmap> bitmapList;
     private Context context;
-    private Bitmap bitmap;
 
-    public ImagesRecyclerViewAdapter(List<AssetPhotos> assetPhotosList, Context context, Bitmap bitmap) {
-        this.assetPhotosList = assetPhotosList;
+    public ImagesRecyclerViewAdapter(List<Bitmap> bitmapList, Context context) {
+        this.bitmapList = bitmapList;
         this.context = context;
-        this.bitmap = bitmap;
     }
 
     @NonNull
@@ -35,17 +35,17 @@ public class ImagesRecyclerViewAdapter extends RecyclerView.Adapter<ImagesRecycl
 
     @Override
     public void onBindViewHolder(@NonNull ImagesRecyclerViewHolder holder, int position) {
-        AssetPhotos assetPhotos = assetPhotosList.get(position);
-        holder.vincula(assetPhotos);
+        Bitmap bitmap = bitmapList.get(position);
+        holder.vincula(bitmap);
     }
 
     @Override
     public int getItemCount() {
-        return assetPhotosList.size();
+        return bitmapList.size();
     }
 
-    public void atualizaLista(List<AssetPhotos> assetPhotosList) {
-        this.assetPhotosList = assetPhotosList;
+    public void atualizaLista(List<Bitmap> bitmapList) {
+        this.bitmapList = bitmapList;
         notifyDataSetChanged();
     }
 
@@ -59,9 +59,9 @@ public class ImagesRecyclerViewAdapter extends RecyclerView.Adapter<ImagesRecycl
             imgAsset = itemView.findViewById(R.id.list_images_assetPhoto);
         }
 
-        public void vincula(AssetPhotos assetPhotos) {
-            txtNomeImage.setText(assetPhotos.getId() + "_asset_" + assetPhotos.getAssetId());
-            imgAsset.setImageBitmap(bitmap);
+        public void vincula(Bitmap assetPhoto) {
+            txtNomeImage.setText("asset_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+            imgAsset.setImageBitmap(assetPhoto);
         }
     }
 }

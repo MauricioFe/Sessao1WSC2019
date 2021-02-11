@@ -11,6 +11,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nome da imagem"
+        android:textColor="#222"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/list_images_assetPhoto"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.42"
@@ -19,8 +21,9 @@
 
     <ImageView
         android:id="@+id/list_images_assetPhoto"
-        android:layout_width="96dp"
+        android:layout_width="103dp"
         android:layout_height="101dp"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
