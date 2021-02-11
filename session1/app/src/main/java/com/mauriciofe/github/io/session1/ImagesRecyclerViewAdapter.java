@@ -11,8 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mauriciofe.github.io.session1.models.AssetPhotos;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;

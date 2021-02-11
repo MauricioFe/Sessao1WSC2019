@@ -3,17 +3,12 @@ package com.mauriciofe.github.io.session1;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PersistableBundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -22,7 +17,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,20 +24,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.mauriciofe.github.io.session1.models.AssetGroup;
 import com.mauriciofe.github.io.session1.models.Assets;
-import com.mauriciofe.github.io.session1.models.Department;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -209,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
     private void preencheSpinnerDepartment() {
         List<String> departmentNameList = new ArrayList<>();
         List<Integer> departmentIdList = new ArrayList<>();
-        ConfigConsumeApi.requestApi(BASE_URL + "departments", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "departments", new Callback<String>() {
 
             @Override
             public void onComplete(String result) {
@@ -256,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> assetGroupsIdList = new ArrayList<>();
         assetGroupsIdList.add(0);
         assetGroupsNameList.add("Asset Group");
-        ConfigConsumeApi.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 try {
@@ -294,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preencheRecyclerView(String uri) {
-        ConfigConsumeApi.requestApi(uri, new Callback<String>() {
+        MyAsyncTask.requestApi(uri, new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 List<Assets> assetsList = convertJsonToAssets(result);

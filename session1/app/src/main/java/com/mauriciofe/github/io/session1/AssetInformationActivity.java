@@ -4,7 +4,11 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,8 +30,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnDepartment;
@@ -53,43 +60,94 @@ public class AssetInformationActivity extends AppCompatActivity {
     String departmentIdStr;
     String assetGroupIdStr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_BROWSE_IMAGE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asset_information);
         inicializaCampos();
-        mAdapter = new ImagesRecyclerViewAdapter(bitmapList, this);
-        recyclerListImages.setLayoutManager(new LinearLayoutManager(AssetInformationActivity.this));
-        recyclerListImages.setAdapter(mAdapter);
+        configuraRecyclerView();
         preencheSpinnerAssetGroups();
         preencheSpinnerDepartment();
         preencheSpinnerLocation();
         preencheSpinnerAccountable();
+        abreCamera();
+        btnBrowse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ActivityCompat.checkSelfPermission(AssetInformationActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                    carregarFotoGaleriaIntent();
+                else
+                    ActivityCompat.requestPermissions(AssetInformationActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_BROWSE_IMAGE);
+            }
+        });
+    }
+
+    private void abreCamera() {
         btnCaptureImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (ActivityCompat.checkSelfPermission(AssetInformationActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
                     tirarFotoIntent();
-                else
-                    ActivityCompat.requestPermissions(AssetInformationActivity.this, new String[]{Manifest.permission.CAMERA}, 0);
+                else {
+                    ActivityCompat.requestPermissions(AssetInformationActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
+                }
             }
         });
+    }
+
+    private void configuraRecyclerView() {
+        mAdapter = new ImagesRecyclerViewAdapter(bitmapList, this);
+        recyclerListImages.setLayoutManager(new LinearLayoutManager(AssetInformationActivity.this));
+        recyclerListImages.setAdapter(mAdapter);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            bitmapList.add(getPictureImage(extras));
-            mAdapter.atualizaLista(bitmapList);
+            preencheListaBitmap(data);
+        }
+        if (requestCode == REQUEST_BROWSE_IMAGE && resultCode == RESULT_OK) {
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Bitmap bitmap = preencheListaBitmapFromGallery(data.getData());
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            bitmapList.add(bitmap);
+                            mAdapter.atualizaLista(bitmapList);
+                        }
+                    });
+                }
+            });
+
         }
     }
 
+    private Bitmap preencheListaBitmapFromGallery(Uri data) {
+        try {
+            return BitmapFactory.decodeStream(this.getContentResolver().openInputStream(data));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void preencheListaBitmap(@Nullable Intent data) {
+        assert data != null;
+        Bundle extras = data.getExtras();
+        Bitmap bitmap = getPictureImage(extras);
+        bitmapList.add(bitmap);
+        mAdapter.atualizaLista(bitmapList);
+    }
+
     private Bitmap getPictureImage(Bundle extras) {
-        Bitmap imageBitmap = (Bitmap) extras.get("data");
-        return imageBitmap;
+        return (Bitmap) extras.get("data");
     }
 
     private void tirarFotoIntent() {
@@ -99,10 +157,17 @@ public class AssetInformationActivity extends AppCompatActivity {
         }
     }
 
+    private void carregarFotoGaleriaIntent() {
+        Intent carregarFortoGaleriaIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        if (carregarFortoGaleriaIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(carregarFortoGaleriaIntent, "Selecione uma imagem"), REQUEST_BROWSE_IMAGE);
+        }
+    }
+
     private void preencheSpinnerDepartment() {
         List<String> departmentNameList = new ArrayList<>();
         List<Integer> departmentIdList = new ArrayList<>();
-        ConfigConsumeApi.requestApi(BASE_URL + "departments", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "departments", new Callback<String>() {
 
             @Override
             public void onComplete(String result) {
@@ -151,7 +216,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheAssetSn() {
-        ConfigConsumeApi.requestApi(BASE_URL + "assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr,
+        MyAsyncTask.requestApi(BASE_URL + "assets/search?assetSn=" + departmentIdStr + "/" + assetGroupIdStr,
                 new Callback<String>() {
                     @Override
                     public void onComplete(String result) {
@@ -189,7 +254,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     private void preencheSpinnerLocation() {
         List<Integer> locationListId = new ArrayList<>();
         List<String> locationListName = new ArrayList<>();
-        ConfigConsumeApi.requestApi(BASE_URL + "location", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "location", new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 locationListId.add(0);
@@ -229,7 +294,7 @@ public class AssetInformationActivity extends AppCompatActivity {
         List<String> employeeListName = new ArrayList<>();
         employeeListId.add(0);
         employeeListName.add("Accontable Party");
-        ConfigConsumeApi.requestApi(BASE_URL + "Employees", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "Employees", new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 JSONArray jsonArray = null;
@@ -267,7 +332,7 @@ public class AssetInformationActivity extends AppCompatActivity {
         List<Integer> assetGroupsIdList = new ArrayList<>();
         assetGroupsIdList.add(0);
         assetGroupsNameList.add("Asset Group");
-        ConfigConsumeApi.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "assetGroups", new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 try {

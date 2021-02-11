@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ConfigConsumeApi {
+public class MyAsyncTask {
     private final static ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final static Handler handler = new Handler(Looper.getMainLooper());
 
