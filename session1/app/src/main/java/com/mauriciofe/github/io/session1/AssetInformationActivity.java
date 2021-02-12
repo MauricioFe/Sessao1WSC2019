@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mauriciofe.github.io.session1.models.Assets;
+import com.mauriciofe.github.io.session1.models.Employee;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -90,7 +91,35 @@ public class AssetInformationActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insereNewAsset();
+                if (edtAssetName.getText().length() > 0 && locationId > 0 && departmentId > 0 && assetGroupId > 0
+                        && accounableId > 0)
+                    verificaAssetSn(BASE_URL + "assets/assetName?assetName=" + edtAssetName.getText() + "&locationID=" + locationId);
+                else
+                    new AlertDialog.Builder(AssetInformationActivity.this)
+                            .setTitle("Erro ao tentar inserir")
+                            .setMessage("Não é possível inserir um ativo de mesmo nome no mesmo local")
+                            .setNeutralButton("OK", null)
+                            .show();
+            }
+        });
+    }
+
+    private void verificaAssetSn(String uri) {
+        MyAsyncTask.requestApi(uri, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                try {
+                    if (new JSONObject(result).getInt("quantidadeRegistros") == 0)
+                        insereNewAsset();
+                    else
+                        new AlertDialog.Builder(AssetInformationActivity.this)
+                                .setTitle("Erro ao tentar inserir")
+                                .setMessage("Não é possível inserir um ativo de mesmo nome no mesmo local")
+                                .setNeutralButton("OK", null)
+                                .show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -131,22 +160,25 @@ public class AssetInformationActivity extends AppCompatActivity {
                         MyAsyncTask.requestApi(BASE_URL + "assets", MyAsyncTask.METHOD_POST, js.toString(), new Callback<String>() {
                             @Override
                             public void onComplete(String result) {
-                                MyAsyncTask.requestApi(BASE_URL + "assets/last", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
-                                    @Override
-                                    public void onComplete(String result) {
-                                        if (result != null) {
-                                            try {
-                                                insereAssetsPhotos(BASE_URL + "assetPhoto", new JSONObject(result).getInt("id"));
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
+                                if (bitmapList.size() > 0) {
+                                    MyAsyncTask.requestApi(BASE_URL + "assets/last", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                                        @Override
+                                        public void onComplete(String result) {
+                                            if (result != null) {
+                                                try {
+                                                    insereAssetsPhotos(BASE_URL + "assetPhoto", new JSONObject(result).getInt("id"));
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            } else {
+                                                new AlertDialog.Builder(AssetInformationActivity.this).setTitle("Erro ao enviar cadastro")
+                                                        .setMessage("Erro ao realizar cadastro tente novamente mais tarde")
+                                                        .setNeutralButton("OK", null).show();
                                             }
-                                        } else {
-                                            new AlertDialog.Builder(AssetInformationActivity.this).setTitle("Erro ao enviar cadastro")
-                                                    .setMessage("Erro ao realizar cadastro tente novamente mais tarde")
-                                                    .setNeutralButton("OK", null).show();
                                         }
-                                    }
-                                });
+                                    });
+                                }else
+                                    startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
                             }
                         });
                     }
