@@ -1,8 +1,10 @@
 package com.mauriciofe.github.io.session1;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -169,7 +171,14 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, AssetInformationActivity.class));
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    startActivity(new Intent(MainActivity.this, AssetInformationActivity.class));
+                else
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Adicionar asset")
+                            .setMessage("Para adionar ou editar um asset o celular tem que estar em modo paisagem")
+                            .setNeutralButton("OK", null)
+                            .show();
             }
         });
     }

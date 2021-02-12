@@ -1,7 +1,9 @@
 package com.mauriciofe.github.io.session1;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -82,10 +84,18 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
                 @Override
                 public void onClick(View v) {
                     if (v.getId() == imgEdit.getId()) {
-                        Intent intent = new Intent(context, AssetInformationActivity.class);
-                        long id = AssetsAdapter.this.getItemId(getAdapterPosition());
-                        intent.putExtra("assetId", id);
-                        context.startActivity(intent);
+                        if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            Intent intent = new Intent(context, AssetInformationActivity.class);
+                            long id = AssetsAdapter.this.getItemId(getAdapterPosition());
+                            intent.putExtra("assetId", id);
+                            context.startActivity(intent);
+                        } else
+                            new AlertDialog.Builder(context)
+                                    .setTitle("Adicionar asset")
+                                    .setMessage("Para adionar ou editar um asset o celular tem que estar em modo paisagem")
+                                    .setNeutralButton("OK", null)
+                                    .show();
+
                     }
                 }
             });
