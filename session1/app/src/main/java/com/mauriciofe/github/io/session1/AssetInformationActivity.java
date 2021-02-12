@@ -8,19 +8,16 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,21 +27,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mauriciofe.github.io.session1.models.Assets;
-import com.mauriciofe.github.io.session1.models.Employee;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import java.io.FileNotFoundException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
-import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
 
 public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnDepartment;
@@ -63,7 +53,6 @@ public class AssetInformationActivity extends AppCompatActivity {
     private long locationId;
     private long assetGroupId;
     private long accounableId;
-    List<Assets> assetSnList = new ArrayList<>();
     List<Bitmap> bitmapList = new ArrayList<>();
     ImagesRecyclerViewAdapter mAdapter;
     RecyclerView recyclerListImages;
