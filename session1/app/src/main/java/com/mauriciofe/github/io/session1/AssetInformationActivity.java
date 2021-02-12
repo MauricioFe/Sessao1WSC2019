@@ -93,6 +93,28 @@ public class AssetInformationActivity extends AppCompatActivity {
         abreGaleria();
         Intent receiverAssetIntent = getIntent();
         long assetID = receiverAssetIntent.getLongExtra("assetId", 0);
+        preencheCamposParaEdicao(assetID);
+        cancelarAcao();
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (edtAssetName.getText().length() > 0 && locationId > 0 && departmentId > 0 && assetGroupId > 0
+                        && accounableId > 0)
+                    if (assetID <= 0)
+                        verificaAssetSn(BASE_URL + "assets/assetName?assetName=" + edtAssetName.getText() + "&locationID=" + locationId);
+                    else
+                        editaAsset(assetID);
+                else
+                    new AlertDialog.Builder(AssetInformationActivity.this)
+                            .setTitle("Erro ao tentar inserir")
+                            .setMessage("Não é possível inserir um ativo de mesmo nome no mesmo local")
+                            .setNeutralButton("OK", null)
+                            .show();
+            }
+        });
+    }
+
+    private void preencheCamposParaEdicao(long assetID) {
         if (assetID > 0) {
             MyAsyncTask.requestApi(BASE_URL + "assets/" + assetID, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
                 @Override
@@ -118,27 +140,13 @@ public class AssetInformationActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void cancelarAcao() {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
-            }
-        });
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (edtAssetName.getText().length() > 0 && locationId > 0 && departmentId > 0 && assetGroupId > 0
-                        && accounableId > 0)
-                    if (assetID <= 0)
-                        verificaAssetSn(BASE_URL + "assets/assetName?assetName=" + edtAssetName.getText() + "&locationID=" + locationId);
-                    else
-                        editaAsset(assetID);
-                else
-                    new AlertDialog.Builder(AssetInformationActivity.this)
-                            .setTitle("Erro ao tentar inserir")
-                            .setMessage("Não é possível inserir um ativo de mesmo nome no mesmo local")
-                            .setNeutralButton("OK", null)
-                            .show();
             }
         });
     }
@@ -191,68 +199,57 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void insereNewAsset() {
-        JSONStringer js = new JSONStringer();
-        try {
-            js.object();
-            js.key("departmentId").value(departmentId);
-            js.key("locationId").value(locationId);
-            js.key("startDate").value(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-            js.key("endDate").value(null);
-            js.endObject();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        MyAsyncTask.requestApi(BASE_URL + "departmentLocation", MyAsyncTask.METHOD_POST, js.toString(), new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
-                MyAsyncTask.requestApi(BASE_URL + "departmentLocation", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
-                    @Override
-                    public void onComplete(String result) {
-                        JSONStringer js = new JSONStringer();
-                        try {
-                            JSONObject jsonObject = new JSONObject(result);
-                            js.object();
-                            js.key("assetSn").value(txtAssetSN.getText());
-                            js.key("assetName").value(edtAssetName.getText());
-                            js.key("departmentLocationId").value(jsonObject.getInt("id"));
-                            js.key("employeeId").value(accounableId);
-                            js.key("assetGroupId").value(assetGroupId);
-                            js.key("description").value(edtDescription.getText());
-                            if (edtWarrantyDate.getText().length() == 0) {
-                                js.key("warrantyDate").value(null);
-                            } else {
-                                js.key("warrantyDate").value(edtWarrantyDate.getText());
-                            }
-                            js.endObject();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                if (result != null) {
+                    JSONStringer js = new JSONStringer();
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+                        js.object();
+                        js.key("assetSn").value(txtAssetSN.getText());
+                        js.key("assetName").value(edtAssetName.getText());
+                        js.key("departmentLocationId").value(jsonObject.getInt("id"));
+                        js.key("employeeId").value(accounableId);
+                        js.key("assetGroupId").value(assetGroupId);
+                        js.key("description").value(edtDescription.getText());
+                        if (edtWarrantyDate.getText().length() == 0) {
+                            js.key("warrantyDate").value(null);
+                        } else {
+                            js.key("warrantyDate").value(edtWarrantyDate.getText());
                         }
-                        MyAsyncTask.requestApi(BASE_URL + "assets", MyAsyncTask.METHOD_POST, js.toString(), new Callback<String>() {
-                            @Override
-                            public void onComplete(String result) {
-                                if (bitmapList.size() > 0) {
-                                    MyAsyncTask.requestApi(BASE_URL + "assets/last", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
-                                        @Override
-                                        public void onComplete(String result) {
-                                            if (result != null) {
-                                                try {
-                                                    insereAssetsPhotos(BASE_URL + "assetPhoto", new JSONObject(result).getInt("id"));
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            } else {
-                                                new AlertDialog.Builder(AssetInformationActivity.this).setTitle("Erro ao enviar cadastro")
-                                                        .setMessage("Erro ao realizar cadastro tente novamente mais tarde")
-                                                        .setNeutralButton("OK", null).show();
-                                            }
-                                        }
-                                    });
-                                } else
-                                    startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
-                            }
-                        });
+                        js.endObject();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                });
+
+                    MyAsyncTask.requestApi(BASE_URL + "assets", MyAsyncTask.METHOD_POST, js.toString(), new Callback<String>() {
+                        @Override
+                        public void onComplete(String result) {
+                            if (bitmapList.size() > 0) {
+                                MyAsyncTask.requestApi(BASE_URL + "assets/last", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                                    @Override
+                                    public void onComplete(String result) {
+                                        if (result != null) {
+                                            try {
+                                                insereAssetsPhotos(BASE_URL + "assetPhoto", new JSONObject(result).getInt("id"));
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            new AlertDialog.Builder(AssetInformationActivity.this).setTitle("Erro ao enviar cadastro")
+                                                    .setMessage("Erro ao realizar cadastro tente novamente mais tarde")
+                                                    .setNeutralButton("OK", null).show();
+                                        }
+                                    }
+                                });
+                            } else {
+                                startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
+                                finish();
+                            }
+                        }
+                    });
+                }
             }
         });
     }
