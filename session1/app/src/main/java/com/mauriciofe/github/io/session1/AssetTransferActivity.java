@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,31 @@ public class AssetTransferActivity extends AppCompatActivity {
         preencheSpinnerDepartment();
         preencheSpinnerLocalizacao();
         cancelarAcao();
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                    @Override
+                    public void onComplete(String result) {
+                        JSONStringer js = new JSONStringer();
+                        try {
+                            js.object();
+                            js.key("assetSn").value(edtNewAssetSN.getText().toString());
+
+                            js.endObject();
+                            MyAsyncTask.requestApi(BASE_URL + "assets/tranferAsset/" + assetId, MyAsyncTask.METHOD_PUT, js.toString(), new Callback<String>() {
+                                @Override
+                                public void onComplete(String result) {
+
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
     }
 
     private void cancelarAcao() {
