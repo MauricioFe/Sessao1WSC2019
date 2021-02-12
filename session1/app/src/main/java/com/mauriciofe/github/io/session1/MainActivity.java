@@ -36,9 +36,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
+
 public class MainActivity extends AppCompatActivity {
 
-    private static final String BASE_URL = "http://192.168.0.105:5000/api/";
     Spinner spnDepartment;
     Spinner spnAssetGroup;
     EditText edtStartDate;

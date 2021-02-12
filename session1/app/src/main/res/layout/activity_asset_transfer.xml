@@ -4,27 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#33222222"
     tools:context=".AssetTransferActivity">
 
     <Button
-        android:id="@+id/btnCancel2"
+        android:id="@+id/transfer_btnCancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSubmit2"
+        app:layout_constraintStart_toEndOf="@+id/transfer_btnSubmit"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.781" />
 
     <Button
-        android:id="@+id/btnSubmit2"
+        android:id="@+id/transfer_btnSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/blue"
         android:text="Submit"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnCancel2"
+        app:layout_constraintEnd_toStartOf="@+id/transfer_btnCancel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.781" />
@@ -51,20 +52,21 @@
 
     <Spinner
         android:id="@+id/transfer_spn_department_destination"
-        android:layout_width="180dp"
-        android:layout_height="46dp"
+        android:layout_width="195dp"
+        android:layout_height="47dp"
         android:layout_marginTop="24dp"
         android:backgroundTintMode="multiply"
         android:dropDownWidth="match_parent"
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toStartOf="@id/transfer_spn_department_location"
-        app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetSn"
+        app:layout_constraintStart_toStartOf="@+id/textView7"
         app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
     <Spinner
         android:id="@+id/transfer_spn_department_location"
-        android:layout_width="180dp"
+        android:layout_width="191dp"
         android:layout_height="47dp"
+        android:backgroundTint="#8C8181"
         android:backgroundTintMode="multiply"
         android:dropDownWidth="match_parent"
         android:spinnerMode="dialog"
@@ -76,52 +78,52 @@
         app:layout_constraintVertical_bias="1.0" />
 
     <EditText
-        android:id="@+id/transfer_edtAssetName3"
-        android:layout_width="205dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="26dp"
-        android:ems="10"
-        android:hint="Asset Name"
-        android:inputType="textPersonName"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-    <EditText
         android:id="@+id/transfer_edtAssetName"
         android:layout_width="205dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="26dp"
         android:ems="10"
         android:enabled="false"
         android:hint="Asset Name"
         android:inputType="textPersonName"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <EditText
         android:id="@+id/transfer_edtCurrent_department"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="8dp"
         android:ems="10"
         android:enabled="false"
         android:hint="Current department"
         android:inputType="textPersonName"
-        app:layout_constraintBaseline_toBaselineOf="@+id/transfer_edtAssetName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/transfer_edtAssetName" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/transfer_edtAssetName"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Current Department"
+        app:layout_constraintBottom_toBottomOf="@+id/textView5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.04"
+        app:layout_constraintStart_toStartOf="@+id/transfer_edtCurrent_department"
+        app:layout_constraintTop_toTopOf="@+id/textView5" />
 
     <TextView
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="24dp"
         android:text="Asset Name"
-        app:layout_constraintBottom_toTopOf="@+id/transfer_edtAssetName"
-        app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetName"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <TextView
@@ -133,42 +135,25 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintHorizontal_bias="0.03"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.04000002" />
+        app:layout_constraintVertical_bias="0.022" />
 
     <TextView
         android:id="@+id/textView7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="Destinantion Department"
         android:textColor="#222"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintHorizontal_bias="0.03"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.36" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:text="Asset Name"
-        app:layout_constraintBottom_toTopOf="@+id/transfer_edtAssetName"
-        app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetName"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Department"
-        app:layout_constraintBottom_toTopOf="@+id/transfer_edtCurrent_department"
-        app:layout_constraintStart_toStartOf="@+id/transfer_edtCurrent_department" />
 
     <TextView
         android:id="@+id/textView6"
@@ -177,7 +162,7 @@
         android:layout_marginTop="24dp"
         android:text="Asset SN:"
         app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetSn"
-        app:layout_constraintTop_toBottomOf="@+id/transfer_edtAssetName3" />
+        app:layout_constraintTop_toBottomOf="@+id/transfer_edtAssetName" />
 
     <EditText
         android:id="@+id/transfer_edtAssetSn"
@@ -187,7 +172,7 @@
         android:enabled="false"
         android:inputType="textPersonName"
         android:text="AssetSN"
-        app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetName3"
+        app:layout_constraintStart_toStartOf="@+id/transfer_edtAssetName"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

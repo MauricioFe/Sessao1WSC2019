@@ -104,7 +104,10 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
                     @Override
                     public void onClick(View v) {
                         if (v.getId() == imgTrasnfer.getId()) {
-                            Toast.makeText(v.getContext(), "Transferindo ativo", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(context, AssetTransferActivity.class);
+                            long id = AssetsAdapter.this.getItemId(getAdapterPosition());
+                            intent.putExtra("assetId", id);
+                            context.startActivity(intent);
                         }
                     }
                 });
