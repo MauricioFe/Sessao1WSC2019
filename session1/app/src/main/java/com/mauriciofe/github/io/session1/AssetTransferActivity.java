@@ -1,10 +1,13 @@
 package com.mauriciofe.github.io.session1;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +32,10 @@ public class AssetTransferActivity extends AppCompatActivity {
     Button btnCancel;
     List<String> departmentListString = new ArrayList<>();
     List<Integer> departmentListInt = new ArrayList<>();
+    List<String> locationListString = new ArrayList<>();
+    List<Integer> locationListInt = new ArrayList<>();
+    long departmentId;
+    long locationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,20 +43,58 @@ public class AssetTransferActivity extends AppCompatActivity {
         setContentView(R.layout.activity_asset_transfer);
         assetId = getIntent().getLongExtra("assetId", 0);
         inicializaCampos();
+        preencheSpinnerDepartment();
+        preencheSpinnerLocalizacao();
+    }
+
+    private void preencheSpinnerLocalizacao() {
+        MyAsyncTask.requestApi(BASE_URL + "location/" + departmentId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                try {
+                    locationListInt.clear();
+                    locationListString.clear();
+                    JSONArray jsonArray = new JSONArray(result);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        locationListInt.add(jsonObject.getInt("id"));
+                        locationListString.add(jsonObject.getString("name"));
+                    }
+                    ArrayAdapter adapter = new ArrayAdapter(AssetTransferActivity.this, android.R.layout.simple_spinner_item, locationListString);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spnLocationDepartment.setAdapter(adapter);
+                    spnLocationDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            locationId = locationListInt.get(position);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    private void preencheSpinnerDepartment() {
         MyAsyncTask.requestApi(BASE_URL + "assets/" + assetId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
                 try {
                     JSONObject jsonObject = new JSONObject(result);
-                    long departmentId = jsonObject.getLong("departmentId");
+                    departmentId = jsonObject.getLong("departmentId");
                     edtAssetName.setText(jsonObject.getString("assetName"));
                     edtAssetSN.setText(jsonObject.getString("assetSn"));
                     edtCurrentDepartment.setText(jsonObject.getString("nameDescription"));
                     MyAsyncTask.requestApi(BASE_URL + "departments/destino/" + departmentId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
                         @Override
                         public void onComplete(String result) {
-                            departmentListString.add("Destination Department");
-                            departmentListInt.add(0);
                             try {
                                 JSONArray jsonArray = new JSONArray(result);
                                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -57,14 +102,68 @@ public class AssetTransferActivity extends AppCompatActivity {
                                     departmentListInt.add(jsonObject.getInt("id"));
                                     departmentListString.add(jsonObject.getString("name"));
                                 }
-                                ArrayAdapter<String> adapter = new ArrayAdapter(AssetTransferActivity.this, android.R.layout.simple_spinner_item, departmentListString);
+                                ArrayAdapter adapter = new ArrayAdapter(AssetTransferActivity.this, android.R.layout.simple_spinner_item, departmentListString);
                                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                 spnDestinationDepartment.setAdapter(adapter);
+                                spnDestinationDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                    @Override
+                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                        departmentId = departmentListInt.get(position);
+                                        preencheSpinnerLocalizacao();
+                                        geraNewAssetSn(departmentId);
+                                    }
+
+                                    @Override
+                                    public void onNothingSelected(AdapterView<?> parent) {
+
+                                    }
+                                });
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
                     });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private void geraNewAssetSn(long departmentId) {
+        String assetGroupId = edtAssetSN.getText().toString().substring(3, 5);
+        String departmentIdStr;
+        if (String.valueOf(departmentId).length() > 1)
+            departmentIdStr = String.valueOf(departmentId);
+        else
+            departmentIdStr = "0" + departmentId;
+        MyAsyncTask.requestApi(BASE_URL + "assets/search?assetSn=" + departmentIdStr + "/" + assetGroupId + "/", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                List<String> assetsListString = new ArrayList<>();
+                try {
+                    JSONArray jsonArray = new JSONArray(result);
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        assetsListString.add(jsonObject.getString("assetSn"));
+                    }
+                    String assetSn = null;
+                    String lastAssetSn = null;
+                    for (String item : assetsListString) {
+                        lastAssetSn = item;
+                    }
+                    StringBuilder bacon = new StringBuilder();
+                    if (lastAssetSn != null) {
+                        int n = Integer.parseInt(lastAssetSn.substring(6));
+                        for (int i = 0; i < 4 - String.valueOf(n).length(); i++) {
+                            bacon.append(0);
+                        }
+                        bacon.append(n + 1);
+                        assetSn = departmentIdStr + "/" + assetGroupId + "/" + bacon;
+                    } else {
+                        assetSn = departmentIdStr + "/" + assetGroupId + "/0001";
+                    }
+                    edtNewAssetSN.setText(assetSn);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
+
 public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnDepartment;
     Spinner spnLocation;
@@ -274,10 +276,6 @@ public class AssetInformationActivity extends AppCompatActivity {
         }
     }
 
-    private void insereNewDepartmentLocation(String uri) {
-
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -422,7 +420,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                             departmentId = departmentIdList.get(position);
-
+                            preencheSpinnerLocation();
                             if (assetGroupId > 0 && departmentId > 0) {
                                 departmentIdStr = String.valueOf(departmentId);
                                 assetGroupIdStr = String.valueOf(assetGroupId);
@@ -480,11 +478,9 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerLocation() {
-        MyAsyncTask.requestApi(BASE_URL + "location", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+        MyAsyncTask.requestApi(BASE_URL + "location/" + departmentId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
-                locationListId.add(0);
-                locationListName.add("Locations");
                 try {
                     JSONArray jsonArray = new JSONArray(result);
                     for (int i = 0; i < jsonArray.length(); i++) {
