@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -69,8 +70,14 @@ public class AssetInformationActivity extends AppCompatActivity {
     String assetGroupIdStr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_BROWSE_IMAGE = 2;
-    static final int INSERT_ASSET = 1;
-    static final int EDIT_ASSET = 2;
+    List<String> assetGroupsNameList = new ArrayList<>();
+    List<Integer> assetGroupsIdList = new ArrayList<>();
+    List<String> departmentNameList = new ArrayList<>();
+    List<Integer> departmentIdList = new ArrayList<>();
+    List<Integer> locationListId = new ArrayList<>();
+    List<String> locationListName = new ArrayList<>();
+    List<Integer> employeeListId = new ArrayList<>();
+    List<String> employeeListName = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +91,33 @@ public class AssetInformationActivity extends AppCompatActivity {
         preencheSpinnerAccountable();
         abreCamera();
         abreGaleria();
+        Intent receiverAssetIntent = getIntent();
+        long assetID = receiverAssetIntent.getLongExtra("assetId", 0);
+        if (assetID > 0) {
+            MyAsyncTask.requestApi(BASE_URL + "assets/" + assetID, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                @Override
+                public void onComplete(String result) {
+                    spnAssetGroup.setEnabled(false);
+                    spnDepartment.setEnabled(false);
+                    spnLocation.setEnabled(false);
+                    try {
+                        int positionAssetGroup = assetGroupsIdList.indexOf(new JSONObject(result).getInt("assetGroupId"));
+                        int positionDepartment = departmentIdList.indexOf(new JSONObject(result).getInt("departmentId"));
+                        int positionLocation = locationListId.indexOf(new JSONObject(result).getInt("locationId"));
+                        int positionEmployee = employeeListId.indexOf(new JSONObject(result).getInt("employeeId"));
+                        spnDepartment.setSelection(positionDepartment);
+                        spnAssetGroup.setSelection(positionAssetGroup);
+                        spnLocation.setSelection(positionLocation);
+                        spnAccountable.setSelection(positionEmployee);
+                        edtAssetName.setText(new JSONObject(result).getString("assetName"));
+                        txtAssetSN.setText(new JSONObject(result).getString("assetSn"));
+                        edtDescription.setText(new JSONObject(result).getString("description"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,7 +129,10 @@ public class AssetInformationActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (edtAssetName.getText().length() > 0 && locationId > 0 && departmentId > 0 && assetGroupId > 0
                         && accounableId > 0)
-                    verificaAssetSn(BASE_URL + "assets/assetName?assetName=" + edtAssetName.getText() + "&locationID=" + locationId);
+                    if (assetID <= 0)
+                        verificaAssetSn(BASE_URL + "assets/assetName?assetName=" + edtAssetName.getText() + "&locationID=" + locationId);
+                    else
+                        editaAsset(assetID);
                 else
                     new AlertDialog.Builder(AssetInformationActivity.this)
                             .setTitle("Erro ao tentar inserir")
@@ -126,9 +163,33 @@ public class AssetInformationActivity extends AppCompatActivity {
         });
     }
 
-    private void editaAsset(){
+    private void editaAsset(long assetID) {
+        JSONStringer js = new JSONStringer();
+        try {
+            js.object();
+            js.key("assetName").value(edtAssetName.getText());
+            js.key("employeeId").value(accounableId);
+            js.key("description").value(edtDescription.getText());
+            if (edtWarrantyDate.getText().length() == 0) {
+                js.key("warrantyDate").value(null);
+            } else {
+                js.key("warrantyDate").value(edtWarrantyDate.getText());
+            }
+            js.endObject();
 
+            MyAsyncTask.requestApi(BASE_URL + "assets/" + assetID, MyAsyncTask.METHOD_PUT, js.toString(), new Callback<String>() {
+                @Override
+                public void onComplete(String result) {
+                    if (result != null) {
+                        startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
+                    }
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
+
     private void insereNewAsset() {
         JSONStringer js = new JSONStringer();
         try {
@@ -336,8 +397,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerDepartment() {
-        List<String> departmentNameList = new ArrayList<>();
-        List<Integer> departmentIdList = new ArrayList<>();
+
         MyAsyncTask.requestApi(BASE_URL + "departments", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
 
             @Override
@@ -423,8 +483,6 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerLocation() {
-        List<Integer> locationListId = new ArrayList<>();
-        List<String> locationListName = new ArrayList<>();
         MyAsyncTask.requestApi(BASE_URL + "location", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
@@ -461,8 +519,6 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerAccountable() {
-        List<Integer> employeeListId = new ArrayList<>();
-        List<String> employeeListName = new ArrayList<>();
         employeeListId.add(0);
         employeeListName.add("Accontable Party");
         MyAsyncTask.requestApi(BASE_URL + "Employees", MyAsyncTask.METHOD_GET, null, new Callback<String>() {
@@ -499,8 +555,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerAssetGroups() {
-        List<String> assetGroupsNameList = new ArrayList<>();
-        List<Integer> assetGroupsIdList = new ArrayList<>();
+
         assetGroupsIdList.add(0);
         assetGroupsNameList.add("Asset Group");
         MyAsyncTask.requestApi(BASE_URL + "assetGroups", MyAsyncTask.METHOD_GET, null, new Callback<String>() {

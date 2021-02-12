@@ -1,6 +1,7 @@
 package com.mauriciofe.github.io.session1;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -81,7 +82,10 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
                 @Override
                 public void onClick(View v) {
                     if (v.getId() == imgEdit.getId()) {
-                        Toast.makeText(v.getContext(), "Editar", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(context, AssetInformationActivity.class);
+                        long id = AssetsAdapter.this.getItemId(getAdapterPosition());
+                        intent.putExtra("assetId", id);
+                        context.startActivity(intent);
                     }
                 }
             });
