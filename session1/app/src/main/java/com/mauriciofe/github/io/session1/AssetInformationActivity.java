@@ -69,6 +69,8 @@ public class AssetInformationActivity extends AppCompatActivity {
     String assetGroupIdStr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     static final int REQUEST_BROWSE_IMAGE = 2;
+    static final int INSERT_ASSET = 1;
+    static final int EDIT_ASSET = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +126,9 @@ public class AssetInformationActivity extends AppCompatActivity {
         });
     }
 
+    private void editaAsset(){
+
+    }
     private void insereNewAsset() {
         JSONStringer js = new JSONStringer();
         try {
@@ -152,7 +157,11 @@ public class AssetInformationActivity extends AppCompatActivity {
                             js.key("employeeId").value(accounableId);
                             js.key("assetGroupId").value(assetGroupId);
                             js.key("description").value(edtDescription.getText());
-                            js.key("warrantyDate").value(edtWarrantyDate.getText());
+                            if (edtWarrantyDate.getText().length() == 0) {
+                                js.key("warrantyDate").value(null);
+                            } else {
+                                js.key("warrantyDate").value(edtWarrantyDate.getText());
+                            }
                             js.endObject();
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -177,7 +186,7 @@ public class AssetInformationActivity extends AppCompatActivity {
                                             }
                                         }
                                     });
-                                }else
+                                } else
                                     startActivity(new Intent(AssetInformationActivity.this, MainActivity.class));
                             }
                         });
@@ -185,8 +194,6 @@ public class AssetInformationActivity extends AppCompatActivity {
                 });
             }
         });
-
-
     }
 
     private void insereAssetsPhotos(String uri, int assetId) {
