@@ -8,11 +8,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,9 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
@@ -61,35 +57,16 @@ public class AssetTransferActivity extends AppCompatActivity {
                 MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
                     @Override
                     public void onComplete(String result) {
-                        try {
-                            if (result == null || result.equals("")) {
-                                JSONStringer jsonStringer = new JSONStringer();
-                                jsonStringer.object();
-                                jsonStringer.key("departmentId").value(departmentId);
-                                jsonStringer.key("locationId").value(locationId);
-                                jsonStringer.key("startDate").value(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-                                jsonStringer.endObject();
-                                MyAsyncTask.requestApi(BASE_URL + "departmentLocation", MyAsyncTask.METHOD_POST, jsonStringer.toString(), new Callback<String>() {
-                                    @Override
-                                    public void onComplete(String result) {
-                                        MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
-                                            @Override
-                                            public void onComplete(String result) {
-                                                try {
-                                                    transfer(result);
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-                            } else {
-                                transfer(result);
+                        MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                            @Override
+                            public void onComplete(String result) {
+                                try {
+                                    transfer(result);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        });
                     }
                 });
             }
