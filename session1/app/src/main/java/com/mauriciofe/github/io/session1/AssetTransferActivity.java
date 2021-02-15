@@ -22,7 +22,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
@@ -59,23 +61,51 @@ public class AssetTransferActivity extends AppCompatActivity {
                 MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
                     @Override
                     public void onComplete(String result) {
-                        JSONStringer js = new JSONStringer();
                         try {
-                            js.object();
-                            js.key("assetSn").value(edtNewAssetSN.getText().toString());
-
-                            js.endObject();
-                            MyAsyncTask.requestApi(BASE_URL + "assets/tranferAsset/" + assetId, MyAsyncTask.METHOD_PUT, js.toString(), new Callback<String>() {
-                                @Override
-                                public void onComplete(String result) {
-
-                                }
-                            });
+                            if (result == null || result.equals("")) {
+                                JSONStringer jsonStringer = new JSONStringer();
+                                jsonStringer.object();
+                                jsonStringer.key("departmentId").value(departmentId);
+                                jsonStringer.key("locationId").value(locationId);
+                                jsonStringer.key("startDate").value(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                                jsonStringer.endObject();
+                                MyAsyncTask.requestApi(BASE_URL + "departmentLocation", MyAsyncTask.METHOD_POST, jsonStringer.toString(), new Callback<String>() {
+                                    @Override
+                                    public void onComplete(String result) {
+                                        MyAsyncTask.requestApi(BASE_URL + "departmentLocation/" + departmentId + "/" + locationId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+                                            @Override
+                                            public void onComplete(String result) {
+                                                try {
+                                                    transfer(result);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                transfer(result);
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
                 });
+            }
+        });
+    }
+
+    private void transfer(String result) throws JSONException {
+        JSONStringer js = new JSONStringer();
+        js.object();
+        js.key("assetSn").value(edtNewAssetSN.getText().toString());
+        js.key("departmentLocationId").value(new JSONObject(result).getInt("id"));
+        js.endObject();
+        MyAsyncTask.requestApi(BASE_URL + "assets/transferAsset/" + assetId, MyAsyncTask.METHOD_PUT, js.toString(), new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                startActivity(new Intent(AssetTransferActivity.this, MainActivity.class));
             }
         });
     }
