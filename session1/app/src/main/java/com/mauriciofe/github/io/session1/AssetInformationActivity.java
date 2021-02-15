@@ -36,6 +36,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
+
 public class AssetInformationActivity extends AppCompatActivity {
     Spinner spnDepartment;
     Spinner spnLocation;
@@ -56,7 +58,6 @@ public class AssetInformationActivity extends AppCompatActivity {
     List<Bitmap> bitmapList = new ArrayList<>();
     ImagesRecyclerViewAdapter mAdapter;
     RecyclerView recyclerListImages;
-    private static final String BASE_URL = "http://192.168.0.105:5000/api/";
     String departmentIdStr;
     String assetGroupIdStr;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -467,6 +468,7 @@ public class AssetInformationActivity extends AppCompatActivity {
     }
 
     private void preencheSpinnerLocation() {
+        locationListName.clear();
         MyAsyncTask.requestApi(BASE_URL + "location/" + departmentId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
             @Override
             public void onComplete(String result) {
