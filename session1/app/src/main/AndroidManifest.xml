@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Session1"
         android:usesCleartextTraffic="true">
-        <activity android:name=".AssetTransferActivity"></activity>
+        <activity android:name=".TransferHistoryActivity"></activity>
+        <activity android:name=".AssetTransferActivity" />
         <activity android:name=".AssetInformationActivity" />
         <activity
             android:name=".MainActivity"
