@@ -27,6 +27,8 @@ import static com.mauriciofe.github.io.session1.Constantes.BASE_URL;
 
 public class AssetTransferActivity extends AppCompatActivity {
     private long assetId;
+    private String oldAssetSn;
+    private long oldDepartmentLocationId;
     EditText edtAssetName;
     EditText edtAssetSN;
     EditText edtNewAssetSN;
@@ -69,6 +71,21 @@ public class AssetTransferActivity extends AppCompatActivity {
                         });
                     }
                 });
+            }
+        });
+        buscarOldAssetData(assetId);
+    }
+
+    private void buscarOldAssetData(long assetId) {
+        MyAsyncTask.requestApi(BASE_URL + "assets/" + assetId, MyAsyncTask.METHOD_GET, null, new Callback<String>() {
+            @Override
+            public void onComplete(String result) {
+                try {
+                    oldAssetSn = new JSONObject(result).getString("assetSn");
+                    oldDepartmentLocationId = new JSONObject(result).getInt("departmentLocationId");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

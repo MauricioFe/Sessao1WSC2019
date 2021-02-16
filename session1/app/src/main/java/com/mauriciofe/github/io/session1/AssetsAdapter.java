@@ -115,7 +115,8 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
                     @Override
                     public void onClick(View v) {
                         if (v.getId() == imgHistory.getId()) {
-                            Toast.makeText(v.getContext(), "histórico", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(context, TransferHistoryActivity.class);
+                            context.startActivity(intent);
                         }
                     }
                 });
