@@ -9,17 +9,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mauriciofe.github.io.session1.models.AssetTranferLogs;
+import com.mauriciofe.github.io.session1.models.AssetTransferLogs;
 
 import java.util.List;
 
 public class TransferHistoryAdapter extends RecyclerView.Adapter<TransferHistoryAdapter.TransferHistoryViewHolder> {
     private Context context;
-    private List<AssetTranferLogs> assetTranferLogsList;
+    private List<AssetTransferLogs> assetTransferLogsList;
 
-    public TransferHistoryAdapter(Context context, List<AssetTranferLogs> assetTranferLogsList) {
+    public TransferHistoryAdapter(Context context, List<AssetTransferLogs> assetTransferLogsList) {
         this.context = context;
-        this.assetTranferLogsList = assetTranferLogsList;
+        this.assetTransferLogsList = assetTransferLogsList;
     }
 
     @NonNull
@@ -32,15 +32,19 @@ public class TransferHistoryAdapter extends RecyclerView.Adapter<TransferHistory
     @Override
     public void onBindViewHolder(@NonNull TransferHistoryViewHolder holder, int position) {
         //vinculo os dados do dataset para a view
-        AssetTranferLogs assetTranferLogs = assetTranferLogsList.get(position);
-        holder.vincula(assetTranferLogs);
+        AssetTransferLogs assetTransferLogs = assetTransferLogsList.get(position);
+        holder.vincula(assetTransferLogs);
     }
 
     @Override
     public int getItemCount() {
-        return assetTranferLogsList.size();
+        return assetTransferLogsList.size();
     }
 
+    public void atualizaList(List<AssetTransferLogs> logsList) {
+        this.assetTransferLogsList = logsList;
+        notifyDataSetChanged();
+    }
 
     public class TransferHistoryViewHolder extends RecyclerView.ViewHolder {
         TextView txtRelocationDate;
@@ -58,12 +62,12 @@ public class TransferHistoryAdapter extends RecyclerView.Adapter<TransferHistory
             txtFromDepartment = itemView.findViewById(R.id.item_txtNewDepartment);
         }
 
-        public void vincula(AssetTranferLogs assetTranferLogs) {
-            txtRelocationDate.setText(assetTranferLogs.getTranseferDate());
-            txtToDepartment.setText(assetTranferLogs.getToDepartment());
-            txtToAssetSn.setText(assetTranferLogs.getToAssetSN());
-            txtFromAssetSn.setText(assetTranferLogs.getFromAssetSN());
-            txtFromDepartment.setText(assetTranferLogs.getFromDepartment());
+        public void vincula(AssetTransferLogs assetTransferLogs) {
+            txtRelocationDate.setText(assetTransferLogs.getTranseferDate());
+            txtToDepartment.setText(assetTransferLogs.getToDepartment());
+            txtToAssetSn.setText(assetTransferLogs.getToAssetSN());
+            txtFromAssetSn.setText(assetTransferLogs.getFromAssetSN());
+            txtFromDepartment.setText(assetTransferLogs.getFromDepartment());
         }
     }
 }

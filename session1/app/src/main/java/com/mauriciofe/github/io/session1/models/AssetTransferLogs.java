@@ -1,6 +1,6 @@
 package com.mauriciofe.github.io.session1.models;
 
-public class AssetTranferLogs {
+public class AssetTransferLogs {
     private int Id;
     private int AssetId;
     private String FromAssetSN;
@@ -11,7 +11,7 @@ public class AssetTranferLogs {
     private int ToDepartmentLocationId;
     private String TranseferDate;
 
-    public AssetTranferLogs(int id, int assetId, String fromAssetSN, String fromDepartment, String toAssetSN, String toDepartment, int fromDepartmentLocationId, int toDepartmentLocationId, String transeferDate) {
+    public AssetTransferLogs(int id, int assetId, String fromAssetSN, String fromDepartment, String toAssetSN, String toDepartment, int fromDepartmentLocationId, int toDepartmentLocationId, String transeferDate) {
         Id = id;
         AssetId = assetId;
         FromAssetSN = fromAssetSN;

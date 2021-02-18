@@ -116,6 +116,8 @@ public class AssetsAdapter extends RecyclerView.Adapter<AssetsAdapter.AssetsView
                     public void onClick(View v) {
                         if (v.getId() == imgHistory.getId()) {
                             Intent intent = new Intent(context, TransferHistoryActivity.class);
+                            long id = AssetsAdapter.this.getItemId(getAdapterPosition());
+                            intent.putExtra("assetId", id);
                             context.startActivity(intent);
                         }
                     }
